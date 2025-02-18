@@ -1,11 +1,10 @@
-package uk.gov.companieshouse.chs.notification.sender.api;
+package uk.gov.companieshouse.chs.notification.kafka.consumer;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class ChsNotificationSenderApiApplicationTests {
+class ChsNotificationKafkaConsumerApplicationTests {
 
     @Test
     void contextLoads() {

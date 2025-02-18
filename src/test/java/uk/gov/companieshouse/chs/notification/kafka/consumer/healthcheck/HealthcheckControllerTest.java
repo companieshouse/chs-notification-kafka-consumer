@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.chs.notification.sender.api.healthcheck;
+package uk.gov.companieshouse.chs.notification.kafka.consumer.healthcheck;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

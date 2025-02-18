@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.chs.notification.sender.api.healthcheck;
+package uk.gov.companieshouse.chs.notification.kafka.consumer.healthcheck;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
