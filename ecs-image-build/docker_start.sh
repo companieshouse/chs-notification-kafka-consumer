@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Start script for accounts-association-service
+# Start script for chs-notification-kafka-consumer
 
 PORT=8080
 
