@@ -10,7 +10,6 @@ public interface KafkaTranslatorInterface {
 
     /**
      *
-     *
      * @param emailMessage
      * @return
      */
@@ -18,7 +17,6 @@ public interface KafkaTranslatorInterface {
 
 
     /**
-     *
      *
      * @param letterMessage
      * @return

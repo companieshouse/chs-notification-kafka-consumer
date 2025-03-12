@@ -30,27 +30,28 @@ class ApiIntegrationServiceTest {
     @DisplayName("Translate Kafka Message to GovUkEmailDetails")
     void shouldTranslateEmailNotificationSuccessfully() {
         GovUkEmailDetailsRequest emailRequest = new GovUkEmailDetailsRequest();
+            byte[] expectedByteMessage = new byte[]{1, 2, 3};
+
+            when(kafkaTranslatorInterface.translateEmailKafkaMessage(expectedByteMessage)).thenReturn(emailRequest);
+
+             GovUkEmailDetailsRequest result = apiIntegrationService.translateEmailKafkaMessage(expectedByteMessage);
+
+            verify(kafkaTranslatorInterface, times(1)).translateEmailKafkaMessage(expectedByteMessage);
+            assertEquals(emailRequest, result);
+        }
+
+    @Test
+    @DisplayName("Translate Kafka Message to GovUkLetterDetails")
+    void shouldTranslateLetterNotificationSuccessfully() {
+        GovUkLetterDetailsRequest letterRequest = new GovUkLetterDetailsRequest();
         byte[] expectedByteMessage = new byte[]{1, 2, 3};
 
-        when(kafkaTranslatorInterface.translateEmailKafkaMessage(expectedByteMessage)).thenReturn(emailRequest);
+        when(kafkaTranslatorInterface.translateLetterKafkaMessage(expectedByteMessage)).thenReturn(letterRequest);
 
-        GovUkEmailDetailsRequest result = apiIntegrationService.translateEmailKafkaMessage(expectedByteMessage);
+        GovUkLetterDetailsRequest result = apiIntegrationService.translateLetterKafkaMessage(expectedByteMessage);
 
-        verify(kafkaTranslatorInterface, times(1)).translateEmailKafkaMessage(expectedByteMessage);
-        assertEquals(expectedByteMessage,result);
+        verify(kafkaTranslatorInterface, times(1)).translateLetterKafkaMessage(expectedByteMessage);
+        assertEquals(letterRequest, result);
     }
-
-//    @Test
-//    @DisplayName("Translate Kafka Message to GovUkEmailDetails")
-//    void shouldTranslateLetterNotificationSuccessfully() {
-//        GovUkLetterDetailsRequest letterDetailsRequest = new GovUkLetterDetailsRequest();
-//        byte[] expectedBytes = new byte[]{1, 2, 3};
-//
-//        when(kafkaTranslatorInterface.translateLetterKafkaMessage(expectedBytes)).thenReturn(letterDetailsRequest);
-//
-//        GovUkLetterDetailsRequest result = apiIntegrationService.translateLetterKafkaMessage(expectedBytes);
-//
-//        verify(kafkaTranslatorInterface, times(1)).translateEmailKafkaMessage(result);
-//    }
 
 }

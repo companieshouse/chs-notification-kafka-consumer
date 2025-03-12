@@ -10,7 +10,7 @@ public class ApiIntegrationService {
 
     private final KafkaTranslatorInterface kafkaMessageTranslator;
 
-    ApiIntegrationService(KafkaTranslatorInterface kafkaMessageTranslator) {
+    public ApiIntegrationService(KafkaTranslatorInterface kafkaMessageTranslator) {
         this.kafkaMessageTranslator = kafkaMessageTranslator;
     }
 

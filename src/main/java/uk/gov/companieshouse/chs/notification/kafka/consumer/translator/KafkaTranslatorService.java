@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkEmailDetailsRequest;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkLetterDetailsRequest;
+import uk.gov.companieshouse.notification.ChsEmailNotification;
+import uk.gov.companieshouse.notification.ChsLetterNotification;
 
 @Service
 public class KafkaTranslatorService implements KafkaTranslatorInterface {
@@ -23,6 +25,7 @@ public class KafkaTranslatorService implements KafkaTranslatorInterface {
         this.avroDeserializer = avroDeserializer;
         this.messageMapper = messageMapper;
     }
+
 
     @Override
     public GovUkEmailDetailsRequest translateEmailKafkaMessage(final byte[] emailMessage) {
