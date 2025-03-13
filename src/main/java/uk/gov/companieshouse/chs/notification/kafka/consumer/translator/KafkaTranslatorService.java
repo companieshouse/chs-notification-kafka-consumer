@@ -9,7 +9,7 @@ import uk.gov.companieshouse.notification.ChsEmailNotification;
 import uk.gov.companieshouse.notification.ChsLetterNotification;
 
 @Service
-public class KafkaTranslatorService implements KafkaTranslatorInterface {
+class KafkaTranslatorService implements KafkaTranslatorInterface {
 
     private final String emailKafkaTopic;
 
