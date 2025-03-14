@@ -10,16 +10,16 @@ public interface KafkaTranslatorInterface {
 
     /**
      *
-     * @param emailMessage
-     * @return
+     * @param emailMessage emailMessage
+     * @return GovUkEmailDetailsRequest
      */
      GovUkEmailDetailsRequest translateEmailKafkaMessage(final byte[] emailMessage );
 
 
     /**
      *
-     * @param letterMessage
-     * @return
+     * @param letterMessage letterMessage
+     * @return GovUkLetterDetailsRequest
      */
     GovUkLetterDetailsRequest translateLetterKafkaMessage(final byte [] letterMessage );
 }

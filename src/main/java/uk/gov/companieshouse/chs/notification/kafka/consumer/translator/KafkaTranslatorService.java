@@ -15,14 +15,20 @@ class KafkaTranslatorService implements KafkaTranslatorInterface {
 
     private final String letterKafkaTopic;
 
-    private final AvroDeserializer avroDeserializer;
+    private final AvroDeserializer<ChsEmailNotification> emailAvroDeserializer;
+    private final AvroDeserializer<ChsLetterNotification> letterAvroDeserializer;
 
     private final MessageMapper messageMapper;
 
-    public KafkaTranslatorService(@Value("${kafka.topic.email}") String emailTopic, @Value("${kafka.topic.letter}") String letterTopic, AvroDeserializer avroDeserializer, MessageMapper messageMapper) {
+    public KafkaTranslatorService(@Value("${kafka.topic.email}") String emailTopic,
+                                  @Value("${kafka.topic.letter}") String letterTopic,
+                                  AvroDeserializer<ChsEmailNotification> emailAvroDeserializer,
+                                  AvroDeserializer<ChsLetterNotification> letterAvroDeserializer,
+                                  MessageMapper messageMapper) {
         this.emailKafkaTopic = emailTopic;
         this.letterKafkaTopic = letterTopic;
-        this.avroDeserializer = avroDeserializer;
+        this.emailAvroDeserializer = emailAvroDeserializer;
+        this.letterAvroDeserializer = letterAvroDeserializer;
         this.messageMapper = messageMapper;
     }
 
@@ -38,12 +44,12 @@ class KafkaTranslatorService implements KafkaTranslatorInterface {
     }
 
     private GovUkEmailDetailsRequest convertAvroToGovUkNotifyEmailRequest(final byte[] emailMessage) {
-        final var chsEmailNotification = (ChsEmailNotification) avroDeserializer.deserialize(emailKafkaTopic, emailMessage);
+        final var chsEmailNotification = emailAvroDeserializer.deserialize(emailKafkaTopic, emailMessage);
             return messageMapper.mapToEmailDetailsRequest(chsEmailNotification);
     }
 
     private GovUkLetterDetailsRequest convertAvroToGovUkNotifyLetterRequest(final byte[] letterMessage) {
-        final var chsLetterNotification = (ChsLetterNotification) avroDeserializer.deserialize(letterKafkaTopic, letterMessage);
+        final var chsLetterNotification = letterAvroDeserializer.deserialize(letterKafkaTopic, letterMessage);
         return messageMapper.mapToLetterDetailsRequest(chsLetterNotification);
     }
 
