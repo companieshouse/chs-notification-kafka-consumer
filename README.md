@@ -33,6 +33,6 @@ their behaviour.
 
 | Method | Path     | Description                                 | Documentation                                                                                                                                                                |
 |--------|----------|---------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| GET |  http://127.0.0.1:9000/actuator/health | this endpoint is used to check that the service is running | |
+| GET    | http://127.0.0.1:9000/actuator/health | this endpoint is used to check that the service is running | |
 
 
