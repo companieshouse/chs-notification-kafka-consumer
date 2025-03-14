@@ -24,7 +24,10 @@ public class KafkaTranslatorServiceTest {
     private static final String LETTER_TOPIC = "chs-notification-letter";
 
     @Mock
-    private AvroDeserializer avroDeserializer;
+    private AvroDeserializer<ChsEmailNotification> emailAvroDeserializer;
+
+    @Mock
+    private AvroDeserializer<ChsLetterNotification> letterAvroDeserializer;
 
     @Mock
     private MessageMapper messageMapper;
@@ -34,7 +37,7 @@ public class KafkaTranslatorServiceTest {
 
     @BeforeEach
     void setUp() {
-        kafkaTranslatorService = new KafkaTranslatorService(EMAIL_TOPIC, LETTER_TOPIC, avroDeserializer, messageMapper);
+        kafkaTranslatorService = new KafkaTranslatorService(EMAIL_TOPIC, LETTER_TOPIC, emailAvroDeserializer, letterAvroDeserializer, messageMapper);
     }
 
     @Test
@@ -43,13 +46,13 @@ public class KafkaTranslatorServiceTest {
         GovUkEmailDetailsRequest mappedRequest = mock(GovUkEmailDetailsRequest.class);
         byte[] emailMessage = new byte[]{1, 2, 3};
 
-        when(avroDeserializer.deserialize(EMAIL_TOPIC, emailMessage)).thenReturn(chsEmailNotification);
+        when(emailAvroDeserializer.deserialize(EMAIL_TOPIC, emailMessage)).thenReturn(chsEmailNotification);
         when(messageMapper.mapToEmailDetailsRequest(chsEmailNotification)).thenReturn(mappedRequest);
 
         GovUkEmailDetailsRequest deSerialisedMessage = kafkaTranslatorService.translateEmailKafkaMessage(emailMessage);
 
         verify(messageMapper, times(1)).mapToEmailDetailsRequest(chsEmailNotification);
-        verify(avroDeserializer, times(1)).deserialize(EMAIL_TOPIC, emailMessage);
+        verify(emailAvroDeserializer, times(1)).deserialize(EMAIL_TOPIC, emailMessage);
         assertEquals(mappedRequest, deSerialisedMessage);
     }
 
@@ -59,13 +62,13 @@ public class KafkaTranslatorServiceTest {
         GovUkLetterDetailsRequest mappedRequest = mock(GovUkLetterDetailsRequest.class);
         byte[] letterMessage = new byte[]{1, 2, 3};
 
-        when(avroDeserializer.deserialize(LETTER_TOPIC, letterMessage)).thenReturn(chsLetterNotification);
+        when(letterAvroDeserializer.deserialize(LETTER_TOPIC, letterMessage)).thenReturn(chsLetterNotification);
         when(messageMapper.mapToLetterDetailsRequest(chsLetterNotification)).thenReturn(mappedRequest);
 
         GovUkLetterDetailsRequest deSerialisedMessage = kafkaTranslatorService.translateLetterKafkaMessage(letterMessage);
 
         verify(messageMapper, times(1)).mapToLetterDetailsRequest(chsLetterNotification);
-        verify(avroDeserializer, times(1)).deserialize(LETTER_TOPIC, letterMessage);
+        verify(letterAvroDeserializer, times(1)).deserialize(LETTER_TOPIC, letterMessage);
         assertEquals(mappedRequest, deSerialisedMessage);
     }
 
@@ -74,7 +77,7 @@ public class KafkaTranslatorServiceTest {
         ChsEmailNotification chsEmailNotification = new ChsEmailNotification();
         byte[] emailMessage = new byte[]{1, 2, 3};
 
-        when(avroDeserializer.deserialize(EMAIL_TOPIC, emailMessage)).thenReturn(chsEmailNotification);
+        when(emailAvroDeserializer.deserialize(EMAIL_TOPIC, emailMessage)).thenReturn(chsEmailNotification);
 
         doThrow(new IllegalArgumentException("Invalid message format"))
                 .when(messageMapper).mapToEmailDetailsRequest(chsEmailNotification);
@@ -88,7 +91,7 @@ public class KafkaTranslatorServiceTest {
         ChsLetterNotification chsLetterNotification = new ChsLetterNotification();
         byte[] letterMessage = new byte[]{1, 2, 3};
 
-        when(avroDeserializer.deserialize(LETTER_TOPIC, letterMessage)).thenReturn(chsLetterNotification);
+        when(letterAvroDeserializer.deserialize(LETTER_TOPIC, letterMessage)).thenReturn(chsLetterNotification);
         doThrow(new IllegalArgumentException("Invalid message format"))
                 .when(messageMapper).mapToLetterDetailsRequest(chsLetterNotification);
 
