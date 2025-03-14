@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.chs.notification.kafka.consumer.translator;
 
 import consumer.deserialization.AvroDeserializer;
+import consumer.exception.NonRetryableErrorException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -79,10 +80,10 @@ public class KafkaTranslatorServiceTest {
 
         when(emailAvroDeserializer.deserialize(EMAIL_TOPIC, emailMessage)).thenReturn(chsEmailNotification);
 
-        doThrow(new IllegalArgumentException("Invalid message format"))
+        doThrow(new NonRetryableErrorException("Invalid message format"))
                 .when(messageMapper).mapToEmailDetailsRequest(chsEmailNotification);
 
-        assertThrows(IllegalArgumentException.class, () -> kafkaTranslatorService.translateEmailKafkaMessage(emailMessage));
+        assertThrows(NonRetryableErrorException.class, () -> kafkaTranslatorService.translateEmailKafkaMessage(emailMessage));
         verify(messageMapper, times(1)).mapToEmailDetailsRequest(chsEmailNotification);
     }
 
@@ -92,10 +93,10 @@ public class KafkaTranslatorServiceTest {
         byte[] letterMessage = new byte[]{1, 2, 3};
 
         when(letterAvroDeserializer.deserialize(LETTER_TOPIC, letterMessage)).thenReturn(chsLetterNotification);
-        doThrow(new IllegalArgumentException("Invalid message format"))
+        doThrow(new NonRetryableErrorException("Invalid message format"))
                 .when(messageMapper).mapToLetterDetailsRequest(chsLetterNotification);
 
-        assertThrows(IllegalArgumentException.class, () -> kafkaTranslatorService.translateLetterKafkaMessage(letterMessage));
+        assertThrows(NonRetryableErrorException.class, () -> kafkaTranslatorService.translateLetterKafkaMessage(letterMessage));
         verify(messageMapper, times(1)).mapToLetterDetailsRequest(chsLetterNotification);
     }
 }

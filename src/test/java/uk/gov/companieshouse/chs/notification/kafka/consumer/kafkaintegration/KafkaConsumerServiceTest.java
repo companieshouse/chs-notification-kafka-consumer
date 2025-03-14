@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.chs.notification.kafka.consumer.kafkaintegration;
 
+import consumer.exception.NonRetryableErrorException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
@@ -7,14 +8,15 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.kafka.support.Acknowledgment;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkEmailDetailsRequest;
+import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkLetterDetailsRequest;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.ApiIntegrationInterface;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.translator.KafkaTranslatorInterface;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 @Tag("unit-test")
@@ -25,49 +27,52 @@ public class KafkaConsumerServiceTest {
     @Mock
     private ApiIntegrationInterface apiIntegrationInterface;
 
+    @Mock
+    private Acknowledgment acknowledgment;
+
     @InjectMocks
     private KafkaConsumerService kafkaConsumerService;
 
     private static final String EMAIL_TOPIC = "chs-notification-email";
     private static final String LETTER_TOPIC = "chs-notification-letter";
 
+    private byte[] validEmailMessage;
+    private byte[] validLetterMessage;
+    private GovUkEmailDetailsRequest mockEmailRequest;
+    private GovUkLetterDetailsRequest mockLetterRequest;
+
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
+        validEmailMessage = "valid-email-message".getBytes();
+        mockEmailRequest = new GovUkEmailDetailsRequest();
+        validLetterMessage = "valid-letter-message".getBytes();
+        mockLetterRequest = new GovUkLetterDetailsRequest();
     }
 
-    /*   @Test
+    @Test
     void shouldConsumeEmailMessageSuccessfully() {
-        // Given
-        byte[] messageBytes = "valid-email-message".getBytes();
-        ConsumerRecord<String, byte[]> mockRecord = new ConsumerRecord<>(EMAIL_TOPIC, 0, 0, "key", messageBytes);
 
-        GovUkEmailDetailsRequest mockEmailRequest = new GovUkEmailDetailsRequest();
-        when(kafkaTranslatorInterface.translateEmailKafkaMessage(mockRecord.value())).thenReturn(mockEmailRequest);
+        ConsumerRecord<String, byte[]> record = new ConsumerRecord<>(EMAIL_TOPIC, 0, 0L, "key", validEmailMessage);
+        when(kafkaTranslatorInterface.translateEmailKafkaMessage(record.value())).thenReturn(mockEmailRequest);
 
-        // When
-        kafkaConsumerService.consumeEmailMessage(mockRecord);
+        kafkaConsumerService.consumeEmailMessage(record, acknowledgment);
 
-        // Then
-        verify(kafkaTranslatorInterface).translateEmailKafkaMessage(messageBytes);
+        verify(kafkaTranslatorInterface).translateEmailKafkaMessage(validEmailMessage);
         verify(apiIntegrationInterface).sendEmailMessageToIntegrationApi(mockEmailRequest);
+        verify(acknowledgment).acknowledge();
     }
 
- @Test
+    @Test
     void shouldConsumeLetterMessageSuccessfully() {
-        // Given
-        byte[] messageBytes = "valid-letter-message".getBytes();
-        ConsumerRecord<String, byte[]> mockRecord = new ConsumerRecord<>(LETTER_TOPIC, 0, 0, "key", messageBytes);
 
-        Object mockLetterRequest = new Object(); // Replace with actual LetterRequest type
-        when(kafkaTranslatorInterface.translateLetterKafkaMessage(messageBytes)).thenReturn(mockLetterRequest);
+        ConsumerRecord<String, byte[]> record = new ConsumerRecord<>(LETTER_TOPIC, 0, 0L, "key", validLetterMessage);
+        when(kafkaTranslatorInterface.translateLetterKafkaMessage(record.value())).thenReturn(mockLetterRequest);
 
-        // When
-        kafkaConsumerService.consumeLetterMessage(mockRecord);
+        kafkaConsumerService.consumeLetterMessage(record, acknowledgment);
 
-        // Then
-        verify(kafkaTranslatorInterface).translateLetterKafkaMessage(messageBytes);
+        verify(kafkaTranslatorInterface).translateLetterKafkaMessage(validLetterMessage);
         verify(apiIntegrationInterface).sendLetterMessageToIntegrationApi(mockLetterRequest);
+        verify(acknowledgment).acknowledge();
     }
 
     @Test
@@ -76,43 +81,32 @@ public class KafkaConsumerServiceTest {
         byte[] messageBytes = null;
         ConsumerRecord<String, byte[]> mockRecord = new ConsumerRecord<>("email-topic", 0, 0, "key", messageBytes);
 
-        when(kafkaTranslatorInterface.translateEmailKafkaMessage(null)).thenReturn(null);
+        assertThrows(IllegalArgumentException.class, () -> kafkaConsumerService.consumeEmailMessage(mockRecord,acknowledgment));
 
-        // When
-        kafkaConsumerService.consumeEmailMessage(mockRecord);
-
-        // Then
-        verify(kafkaTranslatorInterface).translateEmailKafkaMessage(null);
         verifyNoInteractions(apiIntegrationInterface);
     }
 
     @Test
     void shouldNotCallApiIntegrationForNullLetterMessage() {
-        // Given
+
         byte[] messageBytes = null;
         ConsumerRecord<String, byte[]> mockRecord = new ConsumerRecord<>("letter-topic", 0, 0, "key", messageBytes);
 
-        when(kafkaTranslatorInterface.translateLetterKafkaMessage(null)).thenReturn(null);
+        assertThrows(IllegalArgumentException.class, () -> kafkaConsumerService.consumeEmailMessage(mockRecord,acknowledgment));
 
-        // When
-        kafkaConsumerService.consumeLetterMessage(mockRecord);
-
-        // Then
-        verify(kafkaTranslatorInterface).translateLetterKafkaMessage(null);
         verifyNoInteractions(apiIntegrationInterface);
     }
 
     @Test
     void shouldHandleExceptionDuringEmailMessageProcessing() {
-        // Given
+
         byte[] messageBytes = "faulty-email-message".getBytes();
         ConsumerRecord<String, byte[]> mockRecord = new ConsumerRecord<>("email-topic", 0, 0, "key", messageBytes);
 
         when(kafkaTranslatorInterface.translateEmailKafkaMessage(messageBytes))
-                .thenThrow(new RuntimeException("Translation failed"));
+                .thenThrow(new NonRetryableErrorException("Translation failed"));
 
-        // When & Then
-        assertThrows(RuntimeException.class, () -> kafkaConsumerService.consumeEmailMessage(mockRecord));
+        assertThrows(NonRetryableErrorException.class, () -> kafkaConsumerService.consumeEmailMessage(mockRecord,acknowledgment));
 
         verify(kafkaTranslatorInterface).translateEmailKafkaMessage(messageBytes);
         verifyNoInteractions(apiIntegrationInterface);
@@ -120,17 +114,16 @@ public class KafkaConsumerServiceTest {
 
     @Test
     void shouldHandleExceptionDuringLetterMessageProcessing() {
-        // Given
+
         byte[] messageBytes = "faulty-letter-message".getBytes();
         ConsumerRecord<String, byte[]> mockRecord = new ConsumerRecord<>("letter-topic", 0, 0, "key", messageBytes);
 
         when(kafkaTranslatorInterface.translateLetterKafkaMessage(messageBytes))
-                .thenThrow(new RuntimeException("Translation failed"));
+                .thenThrow(new NonRetryableErrorException("Translation failed"));
 
-        // When & Then
-        assertThrows(RuntimeException.class, () -> kafkaConsumerService.consumeLetterMessage(mockRecord));
+        assertThrows(NonRetryableErrorException.class, () -> kafkaConsumerService.consumeLetterMessage(mockRecord,acknowledgment));
 
         verify(kafkaTranslatorInterface).translateLetterKafkaMessage(messageBytes);
         verifyNoInteractions(apiIntegrationInterface);
-    }*/
+    }
 }

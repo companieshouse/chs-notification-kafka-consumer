@@ -55,7 +55,7 @@ public class KafkaConfig {
     }
 
     /**
-     * Kafka Listener Container Factory.
+     * Email Kafka Listener Container Factory.
      */
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, ChsEmailNotification> listenerContainerFactoryEmail() {
@@ -68,7 +68,7 @@ public class KafkaConfig {
     }
 
     /**
-     * Kafka Listener Container Factory.
+     * Letter Kafka Listener Container Factory.
      */
     @Bean
     public ConcurrentKafkaListenerContainerFactory<String, ChsLetterNotification> listenerContainerFactoryLetter() {

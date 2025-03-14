@@ -1,12 +1,17 @@
 package uk.gov.companieshouse.chs.notification.kafka.consumer.translator;
 
 import consumer.deserialization.AvroDeserializer;
+import consumer.exception.NonRetryableErrorException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkEmailDetailsRequest;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkLetterDetailsRequest;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.notification.ChsEmailNotification;
 import uk.gov.companieshouse.notification.ChsLetterNotification;
+
+import static uk.gov.companieshouse.chs.notification.kafka.consumer.utils.StaticPropertyUtil.APPLICATION_NAMESPACE;
 
 @Service
 class KafkaTranslatorService implements KafkaTranslatorInterface {
@@ -19,6 +24,8 @@ class KafkaTranslatorService implements KafkaTranslatorInterface {
     private final AvroDeserializer<ChsLetterNotification> letterAvroDeserializer;
 
     private final MessageMapper messageMapper;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
     public KafkaTranslatorService(@Value("${kafka.topic.email}") String emailTopic,
                                   @Value("${kafka.topic.letter}") String letterTopic,
@@ -35,17 +42,29 @@ class KafkaTranslatorService implements KafkaTranslatorInterface {
 
     @Override
     public GovUkEmailDetailsRequest translateEmailKafkaMessage(final byte[] emailMessage) {
-       return  convertAvroToGovUkNotifyEmailRequest(emailMessage);
+        try {
+            return convertAvroToGovUkNotifyEmailRequest(emailMessage);
+        } catch (Exception ex) {
+            LOGGER.error("Unable to deserialise emailMessage:", ex);
+            throw new NonRetryableErrorException(
+                    "Error deserialising chs-notification-email message", ex);
+        }
     }
 
     @Override
     public GovUkLetterDetailsRequest translateLetterKafkaMessage(final byte[] letterMessage) {
-        return  convertAvroToGovUkNotifyLetterRequest(letterMessage);
+        try {
+            return convertAvroToGovUkNotifyLetterRequest(letterMessage);
+        } catch (Exception ex) {
+            LOGGER.error("Unable to deserialise letterMessage:", ex);
+            throw new NonRetryableErrorException(
+                    "Error deserialising chs-notification-letter message", ex);
+        }
     }
 
     private GovUkEmailDetailsRequest convertAvroToGovUkNotifyEmailRequest(final byte[] emailMessage) {
         final var chsEmailNotification = emailAvroDeserializer.deserialize(emailKafkaTopic, emailMessage);
-            return messageMapper.mapToEmailDetailsRequest(chsEmailNotification);
+        return messageMapper.mapToEmailDetailsRequest(chsEmailNotification);
     }
 
     private GovUkLetterDetailsRequest convertAvroToGovUkNotifyLetterRequest(final byte[] letterMessage) {
