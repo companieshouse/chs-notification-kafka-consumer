@@ -5,7 +5,7 @@ import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkEmailDetails
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkLetterDetailsRequest;
 
 @Service
-public class ApiIntegrationService implements ApiIntegrationInterface{
+class ApiIntegrationService implements ApiIntegrationInterface{
     /**
      * @param govUkEmailDetailsRequest GovUkEmailDetailsRequest
      */

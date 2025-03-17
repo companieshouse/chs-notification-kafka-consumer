@@ -13,7 +13,7 @@ import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.ApiI
 import uk.gov.companieshouse.chs.notification.kafka.consumer.translator.KafkaTranslatorInterface;
 
 @Service
-public class KafkaConsumerService {
+class KafkaConsumerService {
 
     private final KafkaTranslatorInterface kafkaTranslatorInterface;
 

@@ -1,4 +1,4 @@
-package uk.gov.companieshouse.chs.notification.kafka.consumer.config;
+package uk.gov.companieshouse.chs.notification.kafka.consumer.kafkaintegration.config;
 
 import consumer.deserialization.AvroDeserializer;
 import org.springframework.context.annotation.Bean;
