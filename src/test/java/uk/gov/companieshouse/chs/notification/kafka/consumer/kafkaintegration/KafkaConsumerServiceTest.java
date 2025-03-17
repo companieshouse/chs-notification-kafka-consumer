@@ -50,7 +50,6 @@ public class KafkaConsumerServiceTest {
 
     @Test
     void should_Consume_Email_Message_Successfully() {
-
         ConsumerRecord<String, byte[]> record = new ConsumerRecord<>(EMAIL_TOPIC, 0, 0L, "key", validEmailMessage);
         when(kafkaTranslatorInterface.translateEmailKafkaMessage(record.value())).thenReturn(mockEmailRequest);
 
@@ -63,7 +62,6 @@ public class KafkaConsumerServiceTest {
 
     @Test
     void should_Consume_Letter_Message_Successfully() {
-
         ConsumerRecord<String, byte[]> record = new ConsumerRecord<>(LETTER_TOPIC, 0, 0L, "key", validLetterMessage);
         when(kafkaTranslatorInterface.translateLetterKafkaMessage(record.value())).thenReturn(mockLetterRequest);
 
@@ -76,9 +74,8 @@ public class KafkaConsumerServiceTest {
 
     @Test
     void should_Not_Call_Api_Integration_For_Null_Email_Message() {
-        // Given
         byte[] messageBytes = null;
-        ConsumerRecord<String, byte[]> mockRecord = new ConsumerRecord<>("email-topic", 0, 0, "key", messageBytes);
+        ConsumerRecord<String, byte[]> mockRecord = new ConsumerRecord<>(EMAIL_TOPIC, 0, 0, "key", messageBytes);
 
         assertThrows(IllegalArgumentException.class, () -> kafkaConsumerService.consumeEmailMessage(mockRecord,acknowledgment));
 
@@ -87,9 +84,8 @@ public class KafkaConsumerServiceTest {
 
     @Test
     void should_Not_Call_Api_Integration_For_Null_Letter_Message() {
-
         byte[] messageBytes = null;
-        ConsumerRecord<String, byte[]> mockRecord = new ConsumerRecord<>("letter-topic", 0, 0, "key", messageBytes);
+        ConsumerRecord<String, byte[]> mockRecord = new ConsumerRecord<>(LETTER_TOPIC, 0, 0, "key", messageBytes);
 
         assertThrows(IllegalArgumentException.class, () -> kafkaConsumerService.consumeEmailMessage(mockRecord,acknowledgment));
 
@@ -98,7 +94,6 @@ public class KafkaConsumerServiceTest {
 
     @Test
     void should_Handle_Exception_During_Email_Message_Processing() {
-
         byte[] messageBytes = "faulty-email-message".getBytes();
         ConsumerRecord<String, byte[]> mockRecord = new ConsumerRecord<>("email-topic", 0, 0, "key", messageBytes);
 
@@ -113,7 +108,6 @@ public class KafkaConsumerServiceTest {
 
     @Test
     void should_Handle_Exception_During_Letter_Message_Processing() {
-
         byte[] messageBytes = "faulty-letter-message".getBytes();
         ConsumerRecord<String, byte[]> mockRecord = new ConsumerRecord<>("letter-topic", 0, 0, "key", messageBytes);
 
