@@ -120,7 +120,7 @@ variable "log_level" {
   description = "The log level for services to use: trace, debug, info or error"
 }
 
-variable "chs-notification-kafka-consumer_version" {
+variable "chs_notification_kafka_consumer_version" {
   type        = string
   description = "The version of the chs-notification-kafka-consumer container to run."
 }
