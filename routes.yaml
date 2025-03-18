@@ -1,0 +1,6 @@
+app_name: chs-notification-kafka-consumer
+group: api
+
+weight: 100
+routes:
+  1: ^/chs-notification-kafka-consumer/actuator/health
