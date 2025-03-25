@@ -1,11 +1,13 @@
 package uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration;
 
-import uk.gov.companieshouse.api.chs_gov_uk_notify_integration_api.model.GovUkLetterDetailsRequest;
-import uk.gov.companieshouse.api.chs_gov_uk_notify_integration_api.model.GovUkEmailDetailsRequest;
+import org.springframework.stereotype.Component;
+import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkEmailDetailsRequest;
+import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkLetterDetailsRequest;
 
+@Component
 public interface ApiIntegrationInterface {
 
-     void sendEmail(GovUkEmailDetailsRequest govUkEmailDetailsRequest);
+     void sendEmailMessageToIntegrationApi(GovUkEmailDetailsRequest govUkEmailDetailsRequest);
 
-     void sendLetter(GovUkLetterDetailsRequest govUkLetterRequest);
+     void sendLetterMessageToIntegrationApi(GovUkLetterDetailsRequest govUkLetterRequest);
 }
