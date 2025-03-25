@@ -10,7 +10,8 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import uk.gov.companieshouse.api.chs_gov_uk_notify_integration_api.model.*;
+import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkEmailDetailsRequest;
+import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkLetterDetailsRequest;
 
 import static org.mockito.Mockito.verify;
 
@@ -37,7 +38,7 @@ class ApiIntegrationImplTest {
     private ApiIntegrationImpl apiIntegrationImpl;
 
     @Test
-     void When_EmailRequestIsValid_Expect_SendEmailIsSuccessful() {
+     void When_EmailRequestIsValid_Expect_EmailMessageIsSentSuccessfully() {
         GovUkEmailDetailsRequest govUkEmailDetailsRequest = new GovUkEmailDetailsRequest();
 
         Mockito.doReturn( requestBodyUriSpec ).when( integrationWebClient ).post();
@@ -48,7 +49,7 @@ class ApiIntegrationImplTest {
         Mockito.doReturn( Mono.empty() ).when( responseSpec ).bodyToMono( Void.class );
 
 
-        apiIntegrationImpl.sendEmail( govUkEmailDetailsRequest );
+        apiIntegrationImpl.sendEmailMessageToIntegrationApi( govUkEmailDetailsRequest );
 
         verify(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
@@ -56,7 +57,7 @@ class ApiIntegrationImplTest {
     }
 
     @Test
-    void When_LetterRequestIsValid_Expect_SendLetterIsSuccessful() {
+    void When_LetterRequestIsValid_Expect_LetterMessageIsSentSuccessfully() {
         GovUkLetterDetailsRequest govUkLetterDetailsRequest = new GovUkLetterDetailsRequest();
 
         Mockito.doReturn( requestBodyUriSpec ).when( integrationWebClient ).post();
@@ -67,7 +68,7 @@ class ApiIntegrationImplTest {
         Mockito.doReturn( Mono.empty() ).when( responseSpec ).bodyToMono( Void.class );
 
 
-        apiIntegrationImpl.sendLetter( govUkLetterDetailsRequest );
+        apiIntegrationImpl.sendLetterMessageToIntegrationApi( govUkLetterDetailsRequest );
 
         verify(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");
@@ -76,6 +77,6 @@ class ApiIntegrationImplTest {
 
     @Test
     void When_EmailRequestIsNull_Expect_ExceptionToBeThrown(){
-        Assertions.assertThrows( NullPointerException.class, () -> apiIntegrationImpl.sendEmail( null ) );
+        Assertions.assertThrows( NullPointerException.class, () -> apiIntegrationImpl.sendEmailMessageToIntegrationApi( null ) );
     }
 }
