@@ -1,17 +1,9 @@
 package uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 import uk.gov.companieshouse.api.chs_gov_uk_notify_integration_api.model.GovUkEmailDetailsRequest;
 import uk.gov.companieshouse.api.chs_gov_uk_notify_integration_api.model.GovUkLetterDetailsRequest;
-
-import java.time.Duration;
-
-// URL Phoneix
-// API key from postman
-// flapdoodle - have a look at this. - only database.
 
 
 @Service
