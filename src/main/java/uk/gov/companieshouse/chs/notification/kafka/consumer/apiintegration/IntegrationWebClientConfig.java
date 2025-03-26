@@ -8,17 +8,21 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class IntegrationWebClientConfig {
 
-    @Value( "${internal.api.url}" )
     private String internalApiUrl;
-
-    @Value( "${chs.internal.api.key}" )
     private String chsInternalApiKey;
 
+    public IntegrationWebClientConfig(
+            @Value("${internal.api.url}") String internalApiUrl,
+            @Value("${chs.internal.api.key}") String chsInternalApiKey) {
+        this.internalApiUrl = internalApiUrl;
+        this.chsInternalApiKey = chsInternalApiKey;
+    }
+
     @Bean
-    public WebClient integrationWebClient(){
+    public WebClient integrationWebClient() {
         return WebClient.builder()
-                .baseUrl( internalApiUrl )
-                .defaultHeader( "Authorization", chsInternalApiKey )
+                .baseUrl(internalApiUrl)
+                .defaultHeader("Authorization", chsInternalApiKey)
                 .build();
     }
 
