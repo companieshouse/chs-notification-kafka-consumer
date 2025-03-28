@@ -8,8 +8,8 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Configuration
 public class IntegrationWebClientConfig {
 
-    private String internalApiUrl;
-    private String chsInternalApiKey;
+    private final String internalApiUrl;
+    private final String chsInternalApiKey;
 
     public IntegrationWebClientConfig(
             @Value("${internal.api.url}") String internalApiUrl,
