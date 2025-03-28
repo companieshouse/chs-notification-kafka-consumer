@@ -10,7 +10,6 @@ import static uk.gov.companieshouse.chs.notification.kafka.consumer.utils.Static
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-
 @Service
 class ApiIntegrationImpl implements ApiIntegrationInterface {
 
@@ -18,38 +17,55 @@ class ApiIntegrationImpl implements ApiIntegrationInterface {
 
     private static final Logger LOG = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
-    public ApiIntegrationImpl( final WebClient integrationWebClient) {
+    public ApiIntegrationImpl(final WebClient integrationWebClient) {
         this.integrationWebClient = integrationWebClient;
     }
 
     @Override
-    public void sendEmailMessageToIntegrationApi(final GovUkEmailDetailsRequest govUkEmailDetailsRequest) {
-         integrationWebClient.post()
+    public void sendEmailMessageToIntegrationApi(final GovUkEmailDetailsRequest govUkEmailDetailsRequest,
+                                                 final Runnable onSuccess) {
+        integrationWebClient.post()
                 .uri("/chs-gov-uk-notify-integration-api/email")
                 .header("Content-Type", "application/json")
                 .bodyValue(govUkEmailDetailsRequest)
-                .retrieve()
-                 .bodyToMono(Void.class)
-                 .doOnSuccess(result -> LOG.info("Successfully sent email request to integration API"))
-                 .onErrorResume(e -> {
-                     return Mono.empty();
-                 })
-                 .subscribe();
+                .exchangeToMono(response -> {
+                    if (response.statusCode().is2xxSuccessful()) {
+                        LOG.info("Successfully sent email request to integration API, status: " + response.statusCode());
+                        onSuccess.run();
+                        return Mono.empty();
+                    } else {
+                        LOG.error("Failed to send email request to integration API, status: " + response.statusCode());
+                        return Mono.error(new RuntimeException("API call failed with status: " + response.statusCode()));
+                    }
+                })
+                .onErrorResume(e -> {
+                    LOG.error("Exception when sending email request to integration API: " + e.getMessage());
+                    return Mono.empty();
+                })
+                .subscribe();
     }
 
     @Override
-    public void sendLetterMessageToIntegrationApi(final GovUkLetterDetailsRequest govUkLetterDetailsRequest) {
-         integrationWebClient.post()
+    public void sendLetterMessageToIntegrationApi(final GovUkLetterDetailsRequest govUkLetterDetailsRequest,
+                                                  final Runnable onSuccess) {
+        integrationWebClient.post()
                 .uri("/chs-gov-uk-notify-integration-api/letter")
                 .header("Content-Type", "application/json")
                 .bodyValue(govUkLetterDetailsRequest)
-                .retrieve()
-                 .bodyToMono(Void.class)
-                 .doOnSuccess(result -> LOG.info("Successfully sent letter request to integration API"))
-                 .onErrorResume(e -> {
-                     return Mono.empty();
-                 })
-                 .subscribe();
+                .exchangeToMono(response -> {
+                    if (response.statusCode().is2xxSuccessful()) {
+                        LOG.info("Successfully sent letter request to integration API, status: " + response.statusCode());
+                        onSuccess.run();
+                        return Mono.empty();
+                    } else {
+                        LOG.error("Failed to send letter request to integration API, status: " + response.statusCode());
+                        return Mono.error(new RuntimeException("API call failed with status: " + response.statusCode()));
+                    }
+                })
+                .onErrorResume(e -> {
+                    LOG.error("Exception when sending letter request to integration API: " + e.getMessage());
+                    return Mono.empty();
+                })
+                .subscribe();
     }
 }
-
