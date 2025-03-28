@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration;
 
-import jakarta.validation.ConstraintViolationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -14,7 +13,6 @@ import reactor.core.publisher.Mono;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkEmailDetailsRequest;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkLetterDetailsRequest;
 
-import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -81,14 +79,4 @@ class ApiIntegrationImplTest {
     void When_EmailRequestIsNull_Expect_ExceptionToBeThrown(){
         Assertions.assertThrows( NullPointerException.class, () -> apiIntegrationImpl.sendEmailMessageToIntegrationApi( null ) );
     }
-
-    @Test
-    void sendEmailMessageToIntegrationApi_withNullRequest_shouldThrowException() {
-        assertThrows(ConstraintViolationException.class, () -> apiIntegrationImpl.sendEmailMessageToIntegrationApi(null) );
-    }
-
-   @Test
-    void sendLetterMessageToIntegrationApi_withNullRequest_shouldThrowException() {
-       assertThrows(ConstraintViolationException.class, () -> apiIntegrationImpl.sendLetterMessageToIntegrationApi(null) );
-   }
 }
