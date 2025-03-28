@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration;
 
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
@@ -11,7 +10,6 @@ import static uk.gov.companieshouse.chs.notification.kafka.consumer.utils.Static
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 
-
 @Service
 class ApiIntegrationImpl implements ApiIntegrationInterface {
 
@@ -19,13 +17,13 @@ class ApiIntegrationImpl implements ApiIntegrationInterface {
 
     private static final Logger LOG = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
-    public ApiIntegrationImpl( final WebClient integrationWebClient) {
+    public ApiIntegrationImpl(final WebClient integrationWebClient) {
         this.integrationWebClient = integrationWebClient;
     }
 
     @Override
     public void sendEmailMessageToIntegrationApi(final GovUkEmailDetailsRequest govUkEmailDetailsRequest,
-                                                 final Acknowledgment acknowledgment) {
+                                                 final Runnable onSuccess) {
         integrationWebClient.post()
                 .uri("/chs-gov-uk-notify-integration-api/email")
                 .header("Content-Type", "application/json")
@@ -33,7 +31,7 @@ class ApiIntegrationImpl implements ApiIntegrationInterface {
                 .exchangeToMono(response -> {
                     if (response.statusCode().is2xxSuccessful()) {
                         LOG.info("Successfully sent email request to integration API, status: " + response.statusCode());
-                        acknowledgment.acknowledge();
+                        onSuccess.run();
                         return Mono.empty();
                     } else {
                         LOG.error("Failed to send email request to integration API, status: " + response.statusCode());
@@ -49,7 +47,7 @@ class ApiIntegrationImpl implements ApiIntegrationInterface {
 
     @Override
     public void sendLetterMessageToIntegrationApi(final GovUkLetterDetailsRequest govUkLetterDetailsRequest,
-                                                  final Acknowledgment acknowledgment) {
+                                                  final Runnable onSuccess) {
         integrationWebClient.post()
                 .uri("/chs-gov-uk-notify-integration-api/letter")
                 .header("Content-Type", "application/json")
@@ -57,7 +55,7 @@ class ApiIntegrationImpl implements ApiIntegrationInterface {
                 .exchangeToMono(response -> {
                     if (response.statusCode().is2xxSuccessful()) {
                         LOG.info("Successfully sent letter request to integration API, status: " + response.statusCode());
-                        acknowledgment.acknowledge();
+                        onSuccess.run();
                         return Mono.empty();
                     } else {
                         LOG.error("Failed to send letter request to integration API, status: " + response.statusCode());
@@ -71,4 +69,3 @@ class ApiIntegrationImpl implements ApiIntegrationInterface {
                 .subscribe();
     }
 }
-

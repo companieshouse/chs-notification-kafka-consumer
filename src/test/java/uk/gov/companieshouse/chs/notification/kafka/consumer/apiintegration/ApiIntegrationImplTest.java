@@ -61,7 +61,7 @@ class ApiIntegrationImplTest {
         when(requestHeadersSpec.exchangeToMono(functionCaptor.capture()))
                 .thenReturn(Mono.empty());
 
-        apiIntegrationImpl.sendEmailMessageToIntegrationApi(govUkEmailDetailsRequest, acknowledgment);
+        apiIntegrationImpl.sendEmailMessageToIntegrationApi(govUkEmailDetailsRequest, acknowledgment::acknowledge);
 
         verify(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
@@ -86,7 +86,7 @@ class ApiIntegrationImplTest {
         when(requestHeadersSpec.exchangeToMono(functionCaptor.capture()))
                 .thenReturn(Mono.empty());
 
-        apiIntegrationImpl.sendEmailMessageToIntegrationApi(govUkEmailDetailsRequest, acknowledgment);
+        apiIntegrationImpl.sendEmailMessageToIntegrationApi(govUkEmailDetailsRequest, acknowledgment::acknowledge);
 
         verify(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
@@ -111,7 +111,7 @@ class ApiIntegrationImplTest {
         when(requestHeadersSpec.exchangeToMono(functionCaptor.capture()))
                 .thenReturn(Mono.empty());
 
-        apiIntegrationImpl.sendLetterMessageToIntegrationApi(govUkLetterDetailsRequest, acknowledgment);
+        apiIntegrationImpl.sendLetterMessageToIntegrationApi(govUkLetterDetailsRequest, acknowledgment::acknowledge);
 
         verify(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");
@@ -136,7 +136,7 @@ class ApiIntegrationImplTest {
         when(requestHeadersSpec.exchangeToMono(functionCaptor.capture()))
                 .thenReturn(Mono.empty());
 
-        apiIntegrationImpl.sendLetterMessageToIntegrationApi(govUkLetterDetailsRequest, acknowledgment);
+        apiIntegrationImpl.sendLetterMessageToIntegrationApi(govUkLetterDetailsRequest, acknowledgment::acknowledge);
 
         verify(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");

@@ -4,6 +4,7 @@ import consumer.exception.NonRetryableErrorException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -53,10 +54,17 @@ public class KafkaConsumerServiceTest {
         ConsumerRecord<String, byte[]> record = new ConsumerRecord<>(EMAIL_TOPIC, 0, 0L, "key", validEmailMessage);
         when(kafkaTranslatorInterface.translateEmailKafkaMessage(record.value())).thenReturn(mockEmailRequest);
 
+        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
         kafkaConsumerService.consumeEmailMessage(record, acknowledgment);
 
         verify(kafkaTranslatorInterface).translateEmailKafkaMessage(validEmailMessage);
-        verify(apiIntegrationInterface).sendEmailMessageToIntegrationApi(mockEmailRequest, acknowledgment);
+        verify(apiIntegrationInterface).sendEmailMessageToIntegrationApi(
+                eq(mockEmailRequest),
+                runnableCaptor.capture()
+        );
+
+        runnableCaptor.getValue().run();
+        verify(acknowledgment).acknowledge();
     }
 
     @Test
@@ -64,10 +72,17 @@ public class KafkaConsumerServiceTest {
         ConsumerRecord<String, byte[]> record = new ConsumerRecord<>(LETTER_TOPIC, 0, 0L, "key", validLetterMessage);
         when(kafkaTranslatorInterface.translateLetterKafkaMessage(record.value())).thenReturn(mockLetterRequest);
 
+        ArgumentCaptor<Runnable> runnableCaptor = ArgumentCaptor.forClass(Runnable.class);
         kafkaConsumerService.consumeLetterMessage(record, acknowledgment);
 
         verify(kafkaTranslatorInterface).translateLetterKafkaMessage(validLetterMessage);
-        verify(apiIntegrationInterface).sendLetterMessageToIntegrationApi(mockLetterRequest, acknowledgment);
+        verify(apiIntegrationInterface).sendLetterMessageToIntegrationApi(
+                eq(mockLetterRequest),
+                runnableCaptor.capture()
+        );
+
+        runnableCaptor.getValue().run();
+        verify(acknowledgment).acknowledge();
     }
 
     @Test

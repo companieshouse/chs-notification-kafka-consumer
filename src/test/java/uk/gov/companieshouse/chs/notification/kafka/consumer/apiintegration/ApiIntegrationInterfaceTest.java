@@ -33,7 +33,7 @@ public class ApiIntegrationInterfaceTest {
     })
     public void When_EmailRequestAndAcknowledgmentCombinations_Expect_ExceptionToBeThrown(String requestState, String ackState) {
         GovUkEmailDetailsRequest request = "IsNull".equals(requestState) ? null : new GovUkEmailDetailsRequest();
-        Acknowledgment ack = "IsNull".equals(ackState) ? null : acknowledgment;
+        Runnable ack = "IsNull".equals(ackState) ? null : acknowledgment::acknowledge;
 
         assertThrows(ConstraintViolationException.class, () -> {
             apiIntegration.sendEmailMessageToIntegrationApi(request, ack);
@@ -48,7 +48,7 @@ public class ApiIntegrationInterfaceTest {
     })
     public void When_LetterRequestAndAcknowledgmentCombinations_Expect_ExceptionToBeThrown(String requestState, String ackState) {
         GovUkLetterDetailsRequest request = "IsNull".equals(requestState) ? null : new GovUkLetterDetailsRequest();
-        Acknowledgment ack = "IsNull".equals(ackState) ? null : acknowledgment;
+        Runnable ack = "IsNull".equals(ackState) ? null : acknowledgment::acknowledge;
 
         assertThrows(ConstraintViolationException.class, () -> {
             apiIntegration.sendLetterMessageToIntegrationApi(request, ack);
