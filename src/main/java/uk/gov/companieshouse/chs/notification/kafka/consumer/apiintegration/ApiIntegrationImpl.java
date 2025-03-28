@@ -28,18 +28,14 @@ class ApiIntegrationImpl implements ApiIntegrationInterface {
                 .uri("/chs-gov-uk-notify-integration-api/email")
                 .header("Content-Type", "application/json")
                 .bodyValue(govUkEmailDetailsRequest)
-                .exchangeToMono(response -> {
-                    if (response.statusCode().is2xxSuccessful()) {
-                        LOG.info("Successfully sent email request to integration API, status: " + response.statusCode());
-                        onSuccess.run();
-                        return Mono.empty();
-                    } else {
-                        LOG.error("Failed to send email request to integration API, status: " + response.statusCode());
-                        return Mono.error(new RuntimeException("API call failed with status: " + response.statusCode()));
-                    }
+                .retrieve()
+                .toBodilessEntity()
+                .doOnSuccess(response -> {
+                    LOG.info("Successfully sent email request to integration API");
+                    onSuccess.run();
                 })
                 .onErrorResume(e -> {
-                    LOG.error("Exception when sending email request to integration API: " + e.getMessage());
+                    LOG.error("Failed to send email request to integration API: " + e.getMessage());
                     return Mono.empty();
                 })
                 .subscribe();
@@ -52,18 +48,14 @@ class ApiIntegrationImpl implements ApiIntegrationInterface {
                 .uri("/chs-gov-uk-notify-integration-api/letter")
                 .header("Content-Type", "application/json")
                 .bodyValue(govUkLetterDetailsRequest)
-                .exchangeToMono(response -> {
-                    if (response.statusCode().is2xxSuccessful()) {
-                        LOG.info("Successfully sent letter request to integration API, status: " + response.statusCode());
-                        onSuccess.run();
-                        return Mono.empty();
-                    } else {
-                        LOG.error("Failed to send letter request to integration API, status: " + response.statusCode());
-                        return Mono.error(new RuntimeException("API call failed with status: " + response.statusCode()));
-                    }
+                .retrieve()
+                .toBodilessEntity()
+                .doOnSuccess(response -> {
+                    LOG.info("Successfully sent letter request to integration API");
+                    onSuccess.run();
                 })
                 .onErrorResume(e -> {
-                    LOG.error("Exception when sending letter request to integration API: " + e.getMessage());
+                    LOG.error("Failed to send letter request to integration API: " + e.getMessage());
                     return Mono.empty();
                 })
                 .subscribe();

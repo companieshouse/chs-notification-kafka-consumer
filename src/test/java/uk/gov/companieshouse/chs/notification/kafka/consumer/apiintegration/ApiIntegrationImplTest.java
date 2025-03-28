@@ -1,22 +1,18 @@
 package uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration;
 
-import java.util.function.Function;
-
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.support.Acknowledgment;
-import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkEmailDetailsRequest;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkLetterDetailsRequest;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import static org.mockito.Mockito.*;
 
@@ -37,10 +33,10 @@ class ApiIntegrationImplTest {
     private WebClient.RequestHeadersSpec requestHeadersSpec;
 
     @Mock
-    private Acknowledgment acknowledgment;
+    private WebClient.ResponseSpec responseSpec;
 
     @Mock
-    private ClientResponse clientResponse;
+    private Acknowledgment acknowledgment;
 
     @InjectMocks
     private ApiIntegrationImpl apiIntegrationImpl;
@@ -48,26 +44,21 @@ class ApiIntegrationImplTest {
     @Test
     void When_EmailRequestIsValid_Expect_EmailMessageIsSentSuccessfully() {
         GovUkEmailDetailsRequest govUkEmailDetailsRequest = new GovUkEmailDetailsRequest();
+        ResponseEntity<Void> responseEntity = ResponseEntity.ok().build();
 
         Mockito.doReturn(requestBodyUriSpec).when(integrationWebClient).post();
         Mockito.doReturn(requestBodySpec).when(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
         Mockito.doReturn(requestBodySpec).when(requestBodySpec).header("Content-Type", "application/json");
         Mockito.doReturn(requestHeadersSpec).when(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
-
-        when(clientResponse.statusCode()).thenReturn(HttpStatus.OK);
-
-        ArgumentCaptor<Function<ClientResponse, Mono<Void>>> functionCaptor =
-                ArgumentCaptor.forClass(Function.class);
-        when(requestHeadersSpec.exchangeToMono(functionCaptor.capture()))
-                .thenReturn(Mono.empty());
+        Mockito.doReturn(responseSpec).when(requestHeadersSpec).retrieve();
+        Mockito.doReturn(Mono.just(responseEntity)).when(responseSpec).toBodilessEntity();
 
         apiIntegrationImpl.sendEmailMessageToIntegrationApi(govUkEmailDetailsRequest, acknowledgment::acknowledge);
 
         verify(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
-
-        functionCaptor.getValue().apply(clientResponse);
-        verify(acknowledgment).acknowledge();
+        verify(requestHeadersSpec).retrieve();
+        verify(responseSpec).toBodilessEntity();
     }
 
     @Test
@@ -78,46 +69,36 @@ class ApiIntegrationImplTest {
         Mockito.doReturn(requestBodySpec).when(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
         Mockito.doReturn(requestBodySpec).when(requestBodySpec).header("Content-Type", "application/json");
         Mockito.doReturn(requestHeadersSpec).when(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
-
-        when(clientResponse.statusCode()).thenReturn(HttpStatus.INTERNAL_SERVER_ERROR);
-
-        ArgumentCaptor<Function<ClientResponse, Mono<Void>>> functionCaptor =
-                ArgumentCaptor.forClass(Function.class);
-        when(requestHeadersSpec.exchangeToMono(functionCaptor.capture()))
-                .thenReturn(Mono.empty());
+        Mockito.doReturn(responseSpec).when(requestHeadersSpec).retrieve();
+        Mockito.doReturn(Mono.error(new RuntimeException("Error"))).when(responseSpec).toBodilessEntity();
 
         apiIntegrationImpl.sendEmailMessageToIntegrationApi(govUkEmailDetailsRequest, acknowledgment::acknowledge);
 
         verify(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
-
-        functionCaptor.getValue().apply(clientResponse);
+        verify(requestHeadersSpec).retrieve();
+        verify(responseSpec).toBodilessEntity();
         verify(acknowledgment, never()).acknowledge();
     }
 
     @Test
     void When_LetterRequestIsValid_Expect_LetterMessageIsSentSuccessfully() {
         GovUkLetterDetailsRequest govUkLetterDetailsRequest = new GovUkLetterDetailsRequest();
+        ResponseEntity<Void> responseEntity = ResponseEntity.ok().build();
 
         Mockito.doReturn(requestBodyUriSpec).when(integrationWebClient).post();
         Mockito.doReturn(requestBodySpec).when(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");
         Mockito.doReturn(requestBodySpec).when(requestBodySpec).header("Content-Type", "application/json");
         Mockito.doReturn(requestHeadersSpec).when(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
-
-        when(clientResponse.statusCode()).thenReturn(HttpStatus.OK);
-
-        ArgumentCaptor<Function<ClientResponse, Mono<Void>>> functionCaptor =
-                ArgumentCaptor.forClass(Function.class);
-        when(requestHeadersSpec.exchangeToMono(functionCaptor.capture()))
-                .thenReturn(Mono.empty());
+        Mockito.doReturn(responseSpec).when(requestHeadersSpec).retrieve();
+        Mockito.doReturn(Mono.just(responseEntity)).when(responseSpec).toBodilessEntity();
 
         apiIntegrationImpl.sendLetterMessageToIntegrationApi(govUkLetterDetailsRequest, acknowledgment::acknowledge);
 
         verify(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");
-
-        functionCaptor.getValue().apply(clientResponse);
-        verify(acknowledgment).acknowledge();
+        verify(requestHeadersSpec).retrieve();
+        verify(responseSpec).toBodilessEntity();
     }
 
     @Test
@@ -128,20 +109,15 @@ class ApiIntegrationImplTest {
         Mockito.doReturn(requestBodySpec).when(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");
         Mockito.doReturn(requestBodySpec).when(requestBodySpec).header("Content-Type", "application/json");
         Mockito.doReturn(requestHeadersSpec).when(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
-
-        when(clientResponse.statusCode()).thenReturn(HttpStatus.INTERNAL_SERVER_ERROR);
-
-        ArgumentCaptor<Function<ClientResponse, Mono<Void>>> functionCaptor =
-                ArgumentCaptor.forClass(Function.class);
-        when(requestHeadersSpec.exchangeToMono(functionCaptor.capture()))
-                .thenReturn(Mono.empty());
+        Mockito.doReturn(responseSpec).when(requestHeadersSpec).retrieve();
+        Mockito.doReturn(Mono.error(new RuntimeException("Error"))).when(responseSpec).toBodilessEntity();
 
         apiIntegrationImpl.sendLetterMessageToIntegrationApi(govUkLetterDetailsRequest, acknowledgment::acknowledge);
 
         verify(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");
-
-        functionCaptor.getValue().apply(clientResponse);
+        verify(requestHeadersSpec).retrieve();
+        verify(responseSpec).toBodilessEntity();
         verify(acknowledgment, never()).acknowledge();
     }
 }
