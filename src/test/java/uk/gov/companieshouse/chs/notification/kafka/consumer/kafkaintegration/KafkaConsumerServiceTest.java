@@ -56,8 +56,7 @@ public class KafkaConsumerServiceTest {
         kafkaConsumerService.consumeEmailMessage(record, acknowledgment);
 
         verify(kafkaTranslatorInterface).translateEmailKafkaMessage(validEmailMessage);
-        verify(apiIntegrationInterface).sendEmailMessageToIntegrationApi(mockEmailRequest);
-        verify(acknowledgment).acknowledge();
+        verify(apiIntegrationInterface).sendEmailMessageToIntegrationApi(mockEmailRequest, acknowledgment);
     }
 
     @Test
@@ -68,7 +67,7 @@ public class KafkaConsumerServiceTest {
         kafkaConsumerService.consumeLetterMessage(record, acknowledgment);
 
         verify(kafkaTranslatorInterface).translateLetterKafkaMessage(validLetterMessage);
-        verify(apiIntegrationInterface).sendLetterMessageToIntegrationApi(mockLetterRequest);
+        verify(apiIntegrationInterface).sendLetterMessageToIntegrationApi(mockLetterRequest, acknowledgment);
         verify(acknowledgment).acknowledge();
     }
 
@@ -77,9 +76,10 @@ public class KafkaConsumerServiceTest {
         byte[] messageBytes = null;
         ConsumerRecord<String, byte[]> mockRecord = new ConsumerRecord<>(EMAIL_TOPIC, 0, 0, "key", messageBytes);
 
-        assertThrows(IllegalArgumentException.class, () -> kafkaConsumerService.consumeEmailMessage(mockRecord,acknowledgment));
+        assertThrows(IllegalArgumentException.class, () -> kafkaConsumerService.consumeEmailMessage(mockRecord, acknowledgment));
 
         verifyNoInteractions(apiIntegrationInterface);
+        verify(acknowledgment, never()).acknowledge(); // Verify acknowledgment is not called
     }
 
     @Test
@@ -87,9 +87,10 @@ public class KafkaConsumerServiceTest {
         byte[] messageBytes = null;
         ConsumerRecord<String, byte[]> mockRecord = new ConsumerRecord<>(LETTER_TOPIC, 0, 0, "key", messageBytes);
 
-        assertThrows(IllegalArgumentException.class, () -> kafkaConsumerService.consumeEmailMessage(mockRecord,acknowledgment));
+        assertThrows(IllegalArgumentException.class, () -> kafkaConsumerService.consumeLetterMessage(mockRecord, acknowledgment));
 
         verifyNoInteractions(apiIntegrationInterface);
+        verify(acknowledgment, never()).acknowledge();
     }
 
     @Test
@@ -100,10 +101,11 @@ public class KafkaConsumerServiceTest {
         when(kafkaTranslatorInterface.translateEmailKafkaMessage(messageBytes))
                 .thenThrow(new NonRetryableErrorException("Translation failed"));
 
-        assertThrows(NonRetryableErrorException.class, () -> kafkaConsumerService.consumeEmailMessage(mockRecord,acknowledgment));
+        assertThrows(NonRetryableErrorException.class, () -> kafkaConsumerService.consumeEmailMessage(mockRecord, acknowledgment));
 
         verify(kafkaTranslatorInterface).translateEmailKafkaMessage(messageBytes);
         verifyNoInteractions(apiIntegrationInterface);
+        verify(acknowledgment, never()).acknowledge();
     }
 
     @Test
@@ -114,9 +116,10 @@ public class KafkaConsumerServiceTest {
         when(kafkaTranslatorInterface.translateLetterKafkaMessage(messageBytes))
                 .thenThrow(new NonRetryableErrorException("Translation failed"));
 
-        assertThrows(NonRetryableErrorException.class, () -> kafkaConsumerService.consumeLetterMessage(mockRecord,acknowledgment));
+        assertThrows(NonRetryableErrorException.class, () -> kafkaConsumerService.consumeLetterMessage(mockRecord, acknowledgment));
 
         verify(kafkaTranslatorInterface).translateLetterKafkaMessage(messageBytes);
         verifyNoInteractions(apiIntegrationInterface);
+        verify(acknowledgment, never()).acknowledge();
     }
 }
