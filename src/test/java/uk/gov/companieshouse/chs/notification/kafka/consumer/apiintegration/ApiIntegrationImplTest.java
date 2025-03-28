@@ -5,6 +5,7 @@ import java.util.function.Function;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -54,15 +55,18 @@ class ApiIntegrationImplTest {
         Mockito.doReturn(requestHeadersSpec).when(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
 
         when(clientResponse.statusCode()).thenReturn(HttpStatus.OK);
-        when(requestHeadersSpec.exchangeToMono(any())).thenAnswer(invocation -> {
-            var function = invocation.getArgument(0);
-            return ((java.util.function.Function<ClientResponse, Mono<Void>>) function).apply(clientResponse);
-        });
+
+        ArgumentCaptor<Function<ClientResponse, Mono<Void>>> functionCaptor =
+                ArgumentCaptor.forClass(Function.class);
+        when(requestHeadersSpec.exchangeToMono(functionCaptor.capture()))
+                .thenReturn(Mono.empty());
 
         apiIntegrationImpl.sendEmailMessageToIntegrationApi(govUkEmailDetailsRequest, acknowledgment);
 
         verify(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
+
+        functionCaptor.getValue().apply(clientResponse);
         verify(acknowledgment).acknowledge();
     }
 
@@ -76,15 +80,18 @@ class ApiIntegrationImplTest {
         Mockito.doReturn(requestHeadersSpec).when(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
 
         when(clientResponse.statusCode()).thenReturn(HttpStatus.INTERNAL_SERVER_ERROR);
-        when(requestHeadersSpec.exchangeToMono(any())).thenAnswer(invocation -> {
-            var function = invocation.getArgument(0);
-            return ((Function<ClientResponse, Mono<Void>>) function).apply(clientResponse);
-        });
+
+        ArgumentCaptor<Function<ClientResponse, Mono<Void>>> functionCaptor =
+                ArgumentCaptor.forClass(Function.class);
+        when(requestHeadersSpec.exchangeToMono(functionCaptor.capture()))
+                .thenReturn(Mono.empty());
 
         apiIntegrationImpl.sendEmailMessageToIntegrationApi(govUkEmailDetailsRequest, acknowledgment);
 
         verify(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
+
+        functionCaptor.getValue().apply(clientResponse);
         verify(acknowledgment, never()).acknowledge();
     }
 
@@ -98,15 +105,18 @@ class ApiIntegrationImplTest {
         Mockito.doReturn(requestHeadersSpec).when(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
 
         when(clientResponse.statusCode()).thenReturn(HttpStatus.OK);
-        when(requestHeadersSpec.exchangeToMono(any())).thenAnswer(invocation -> {
-            var function = invocation.getArgument(0);
-            return ((Function<ClientResponse, Mono<Void>>) function).apply(clientResponse);
-        });
+
+        ArgumentCaptor<Function<ClientResponse, Mono<Void>>> functionCaptor =
+                ArgumentCaptor.forClass(Function.class);
+        when(requestHeadersSpec.exchangeToMono(functionCaptor.capture()))
+                .thenReturn(Mono.empty());
 
         apiIntegrationImpl.sendLetterMessageToIntegrationApi(govUkLetterDetailsRequest, acknowledgment);
 
         verify(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");
+
+        functionCaptor.getValue().apply(clientResponse);
         verify(acknowledgment).acknowledge();
     }
 
@@ -120,15 +130,18 @@ class ApiIntegrationImplTest {
         Mockito.doReturn(requestHeadersSpec).when(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
 
         when(clientResponse.statusCode()).thenReturn(HttpStatus.INTERNAL_SERVER_ERROR);
-        when(requestHeadersSpec.exchangeToMono(any())).thenAnswer(invocation -> {
-            var function = invocation.getArgument(0);
-            return ((Function<ClientResponse, Mono<Void>>) function).apply(clientResponse);
-        });
+
+        ArgumentCaptor<Function<ClientResponse, Mono<Void>>> functionCaptor =
+                ArgumentCaptor.forClass(Function.class);
+        when(requestHeadersSpec.exchangeToMono(functionCaptor.capture()))
+                .thenReturn(Mono.empty());
 
         apiIntegrationImpl.sendLetterMessageToIntegrationApi(govUkLetterDetailsRequest, acknowledgment);
 
         verify(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");
+
+        functionCaptor.getValue().apply(clientResponse);
         verify(acknowledgment, never()).acknowledge();
     }
 }

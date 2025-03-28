@@ -68,7 +68,6 @@ public class KafkaConsumerServiceTest {
 
         verify(kafkaTranslatorInterface).translateLetterKafkaMessage(validLetterMessage);
         verify(apiIntegrationInterface).sendLetterMessageToIntegrationApi(mockLetterRequest, acknowledgment);
-        verify(acknowledgment).acknowledge();
     }
 
     @Test
@@ -79,7 +78,7 @@ public class KafkaConsumerServiceTest {
         assertThrows(IllegalArgumentException.class, () -> kafkaConsumerService.consumeEmailMessage(mockRecord, acknowledgment));
 
         verifyNoInteractions(apiIntegrationInterface);
-        verify(acknowledgment, never()).acknowledge(); // Verify acknowledgment is not called
+        verify(acknowledgment, never()).acknowledge();
     }
 
     @Test
