@@ -7,7 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkEmailDetailsRequest;
@@ -36,7 +35,7 @@ class ApiIntegrationImplTest {
     private WebClient.ResponseSpec responseSpec;
 
     @Mock
-    private Acknowledgment acknowledgment;
+    private Runnable callback;
 
     @InjectMocks
     private ApiIntegrationImpl apiIntegrationImpl;
@@ -53,7 +52,7 @@ class ApiIntegrationImplTest {
         Mockito.doReturn(responseSpec).when(requestHeadersSpec).retrieve();
         Mockito.doReturn(Mono.just(responseEntity)).when(responseSpec).toBodilessEntity();
 
-        apiIntegrationImpl.sendEmailMessageToIntegrationApi(govUkEmailDetailsRequest, acknowledgment::acknowledge);
+        apiIntegrationImpl.sendEmailMessageToIntegrationApi(govUkEmailDetailsRequest, callback);
 
         verify(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
@@ -72,13 +71,13 @@ class ApiIntegrationImplTest {
         Mockito.doReturn(responseSpec).when(requestHeadersSpec).retrieve();
         Mockito.doReturn(Mono.error(new RuntimeException("Error"))).when(responseSpec).toBodilessEntity();
 
-        apiIntegrationImpl.sendEmailMessageToIntegrationApi(govUkEmailDetailsRequest, acknowledgment::acknowledge);
+        apiIntegrationImpl.sendEmailMessageToIntegrationApi(govUkEmailDetailsRequest, callback);
 
         verify(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
         verify(requestHeadersSpec).retrieve();
         verify(responseSpec).toBodilessEntity();
-        verify(acknowledgment, never()).acknowledge();
+        verify(callback, never()).run();
     }
 
     @Test
@@ -93,7 +92,7 @@ class ApiIntegrationImplTest {
         Mockito.doReturn(responseSpec).when(requestHeadersSpec).retrieve();
         Mockito.doReturn(Mono.just(responseEntity)).when(responseSpec).toBodilessEntity();
 
-        apiIntegrationImpl.sendLetterMessageToIntegrationApi(govUkLetterDetailsRequest, acknowledgment::acknowledge);
+        apiIntegrationImpl.sendLetterMessageToIntegrationApi(govUkLetterDetailsRequest, callback);
 
         verify(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");
@@ -112,12 +111,12 @@ class ApiIntegrationImplTest {
         Mockito.doReturn(responseSpec).when(requestHeadersSpec).retrieve();
         Mockito.doReturn(Mono.error(new RuntimeException("Error"))).when(responseSpec).toBodilessEntity();
 
-        apiIntegrationImpl.sendLetterMessageToIntegrationApi(govUkLetterDetailsRequest, acknowledgment::acknowledge);
+        apiIntegrationImpl.sendLetterMessageToIntegrationApi(govUkLetterDetailsRequest, callback);
 
         verify(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");
         verify(requestHeadersSpec).retrieve();
         verify(responseSpec).toBodilessEntity();
-        verify(acknowledgment, never()).acknowledge();
+        verify(callback, never()).run();
     }
 }
