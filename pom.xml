@@ -84,7 +84,11 @@
             <artifactId>private-api-sdk-java</artifactId>
             <version>${private-api-sdk-java.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>uk.gov.companieshouse</groupId>
+            <artifactId>api-sdk-manager-java-library</artifactId>
+            <version>${api-sdk-manager-java-library.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webmvc</artifactId>
@@ -153,7 +157,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-webflux</artifactId>
-            <version>7.0.0-M2</version>
         </dependency>
         <dependency>
             <groupId>org.eclipse.jetty</groupId>
