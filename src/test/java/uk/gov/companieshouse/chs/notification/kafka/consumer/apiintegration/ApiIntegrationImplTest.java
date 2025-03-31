@@ -13,7 +13,8 @@ import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkEmailDetails
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkLetterDetailsRequest;
 import org.springframework.http.ResponseEntity;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 @Tag("unit-test")
