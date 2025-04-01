@@ -10,7 +10,7 @@ import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkLetterDetail
 @Component
 public interface ApiIntegrationInterface {
 
-     void sendEmailMessageToIntegrationApi(@NotNull GovUkEmailDetailsRequest govUkEmailDetailsRequest);
+     void sendEmailMessageToIntegrationApi(@NotNull GovUkEmailDetailsRequest govUkEmailDetailsRequest, @NotNull Runnable onSuccess);
 
-     void sendLetterMessageToIntegrationApi(@NotNull GovUkLetterDetailsRequest govUkLetterRequest);
+     void sendLetterMessageToIntegrationApi(@NotNull GovUkLetterDetailsRequest govUkLetterRequest, @NotNull Runnable onSuccess);
 }

@@ -42,8 +42,7 @@ class KafkaConsumerService {
     public void consumeEmailMessage(ConsumerRecord<String, byte[]> record, Acknowledgment acknowledgment) {
         if(record !=null && record.value() !=null && record.value().length !=0) {
             final var emailRequest = kafkaTranslatorInterface.translateEmailKafkaMessage(record.value());
-            apiIntegrationInterface.sendEmailMessageToIntegrationApi(emailRequest);
-            acknowledgment.acknowledge();
+            apiIntegrationInterface.sendEmailMessageToIntegrationApi(emailRequest, acknowledgment::acknowledge);
         } else {
             throw new IllegalArgumentException("Received null or empty Email message");
         }
@@ -67,8 +66,7 @@ class KafkaConsumerService {
     public void consumeLetterMessage(ConsumerRecord<String, byte[]> record, Acknowledgment acknowledgment) {
         if(record !=null && record.value() !=null && record.value().length !=0) {
             final var letterRequest = kafkaTranslatorInterface.translateLetterKafkaMessage(record.value());
-            apiIntegrationInterface.sendLetterMessageToIntegrationApi(letterRequest);
-            acknowledgment.acknowledge();
+            apiIntegrationInterface.sendLetterMessageToIntegrationApi(letterRequest, acknowledgment::acknowledge);
         } else {
             throw new IllegalArgumentException("Received null or empty Letter message");
         }

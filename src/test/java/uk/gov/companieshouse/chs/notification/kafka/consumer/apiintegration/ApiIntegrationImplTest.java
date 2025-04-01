@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration;
 
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,7 +11,9 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkEmailDetailsRequest;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkLetterDetailsRequest;
+import org.springframework.http.ResponseEntity;
 
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -34,49 +35,89 @@ class ApiIntegrationImplTest {
     @Mock
     private WebClient.ResponseSpec responseSpec;
 
+    @Mock
+    private Runnable callback;
+
     @InjectMocks
     private ApiIntegrationImpl apiIntegrationImpl;
 
     @Test
-     void When_EmailRequestIsValid_Expect_EmailMessageIsSentSuccessfully() {
+    void When_EmailRequestIsValid_Expect_EmailMessageIsSentSuccessfully() {
         GovUkEmailDetailsRequest govUkEmailDetailsRequest = new GovUkEmailDetailsRequest();
+        ResponseEntity<Void> responseEntity = ResponseEntity.ok().build();
 
-        Mockito.doReturn( requestBodyUriSpec ).when( integrationWebClient ).post();
-        Mockito.doReturn( requestBodySpec ).when( requestBodyUriSpec ).uri("/chs-gov-uk-notify-integration-api/email");
+        Mockito.doReturn(requestBodyUriSpec).when(integrationWebClient).post();
+        Mockito.doReturn(requestBodySpec).when(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
         Mockito.doReturn(requestBodySpec).when(requestBodySpec).header("Content-Type", "application/json");
-        Mockito.doReturn( requestHeadersSpec ).when( requestBodySpec ).bodyValue( govUkEmailDetailsRequest );
-        Mockito.doReturn( responseSpec ).when( requestHeadersSpec ).retrieve();
-        Mockito.doReturn( Mono.empty() ).when( responseSpec ).bodyToMono( Void.class );
+        Mockito.doReturn(requestHeadersSpec).when(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
+        Mockito.doReturn(responseSpec).when(requestHeadersSpec).retrieve();
+        Mockito.doReturn(Mono.just(responseEntity)).when(responseSpec).toBodilessEntity();
 
-
-        apiIntegrationImpl.sendEmailMessageToIntegrationApi( govUkEmailDetailsRequest );
+        apiIntegrationImpl.sendEmailMessageToIntegrationApi(govUkEmailDetailsRequest, callback);
 
         verify(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
-        verify(responseSpec).bodyToMono(Void.class);
+        verify(requestHeadersSpec).retrieve();
+        verify(responseSpec).toBodilessEntity();
+    }
+
+    @Test
+    void When_EmailRequestFails_Expect_NoAcknowledgment() {
+        GovUkEmailDetailsRequest govUkEmailDetailsRequest = new GovUkEmailDetailsRequest();
+
+        Mockito.doReturn(requestBodyUriSpec).when(integrationWebClient).post();
+        Mockito.doReturn(requestBodySpec).when(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
+        Mockito.doReturn(requestBodySpec).when(requestBodySpec).header("Content-Type", "application/json");
+        Mockito.doReturn(requestHeadersSpec).when(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
+        Mockito.doReturn(responseSpec).when(requestHeadersSpec).retrieve();
+        Mockito.doReturn(Mono.error(new RuntimeException("Error"))).when(responseSpec).toBodilessEntity();
+
+        apiIntegrationImpl.sendEmailMessageToIntegrationApi(govUkEmailDetailsRequest, callback);
+
+        verify(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
+        verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
+        verify(requestHeadersSpec).retrieve();
+        verify(responseSpec).toBodilessEntity();
+        verify(callback, never()).run();
     }
 
     @Test
     void When_LetterRequestIsValid_Expect_LetterMessageIsSentSuccessfully() {
         GovUkLetterDetailsRequest govUkLetterDetailsRequest = new GovUkLetterDetailsRequest();
+        ResponseEntity<Void> responseEntity = ResponseEntity.ok().build();
 
-        Mockito.doReturn( requestBodyUriSpec ).when( integrationWebClient ).post();
-        Mockito.doReturn( requestBodySpec ).when( requestBodyUriSpec ).uri("/chs-gov-uk-notify-integration-api/letter");
+        Mockito.doReturn(requestBodyUriSpec).when(integrationWebClient).post();
+        Mockito.doReturn(requestBodySpec).when(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");
         Mockito.doReturn(requestBodySpec).when(requestBodySpec).header("Content-Type", "application/json");
-        Mockito.doReturn( requestHeadersSpec ).when( requestBodySpec ).bodyValue( govUkLetterDetailsRequest );
-        Mockito.doReturn( responseSpec ).when( requestHeadersSpec ).retrieve();
-        Mockito.doReturn( Mono.empty() ).when( responseSpec ).bodyToMono( Void.class );
+        Mockito.doReturn(requestHeadersSpec).when(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
+        Mockito.doReturn(responseSpec).when(requestHeadersSpec).retrieve();
+        Mockito.doReturn(Mono.just(responseEntity)).when(responseSpec).toBodilessEntity();
 
-
-        apiIntegrationImpl.sendLetterMessageToIntegrationApi( govUkLetterDetailsRequest );
+        apiIntegrationImpl.sendLetterMessageToIntegrationApi(govUkLetterDetailsRequest, callback);
 
         verify(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
         verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");
-        verify(responseSpec).bodyToMono(Void.class);
+        verify(requestHeadersSpec).retrieve();
+        verify(responseSpec).toBodilessEntity();
     }
 
     @Test
-    void When_EmailRequestIsNull_Expect_ExceptionToBeThrown(){
-        Assertions.assertThrows( NullPointerException.class, () -> apiIntegrationImpl.sendEmailMessageToIntegrationApi( null ) );
+    void When_LetterRequestFails_Expect_NoAcknowledgment() {
+        GovUkLetterDetailsRequest govUkLetterDetailsRequest = new GovUkLetterDetailsRequest();
+
+        Mockito.doReturn(requestBodyUriSpec).when(integrationWebClient).post();
+        Mockito.doReturn(requestBodySpec).when(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");
+        Mockito.doReturn(requestBodySpec).when(requestBodySpec).header("Content-Type", "application/json");
+        Mockito.doReturn(requestHeadersSpec).when(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
+        Mockito.doReturn(responseSpec).when(requestHeadersSpec).retrieve();
+        Mockito.doReturn(Mono.error(new RuntimeException("Error"))).when(responseSpec).toBodilessEntity();
+
+        apiIntegrationImpl.sendLetterMessageToIntegrationApi(govUkLetterDetailsRequest, callback);
+
+        verify(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
+        verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");
+        verify(requestHeadersSpec).retrieve();
+        verify(responseSpec).toBodilessEntity();
+        verify(callback, never()).run();
     }
 }
