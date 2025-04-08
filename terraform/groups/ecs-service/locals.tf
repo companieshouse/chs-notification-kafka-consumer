@@ -7,8 +7,8 @@ locals {
   container_port             = "8080" # default Java port to match start script
   docker_repo                = "chs-notification-kafka-consumer"
   lb_listener_rule_priority  = 24
-  lb_listener_paths          = ["/chs-notification-kafka-consumer/actuator/health"]
-  healthcheck_path           = "/chs-notification-kafka-consumer/actuator/health" #healthcheck path for chs-notification-kafka-consumer service
+  lb_listener_paths          = ["/notification-consumer/healthcheck"]
+  healthcheck_path           = "/notification-consumer/healthcheck" #healthcheck path for chs-notification-kafka-consumer service
   healthcheck_matcher        = "200"
   application_subnet_ids     = data.aws_subnets.application.ids
   kms_alias                  = "alias/${var.aws_profile}/environment-services-kms"
