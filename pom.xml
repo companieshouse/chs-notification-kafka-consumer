@@ -248,7 +248,7 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${spring-boot.version}</version>
                 <configuration>
-                    <mainClass>uk.gov.companieshouse.chs.notification.sender.api.ChsNotificationKafkaConsumerApplication
+                    <mainClass>uk.gov.companieshouse.chs.notification.kafka.consumer.ChsNotificationKafkaConsumerApplication
                     </mainClass>
                 </configuration>
                 <executions>
