@@ -1,38 +1,98 @@
 # chs-notification-kafka-consumer
 
-## 1.0) Introduction
-
-This module consumes kafka messages from the CHS Notification Kafka3 API module and sends a request to the Gov UK Notify integration module to send a letter or email.
-
-The design for this module and the service it is a part of is here : https://companieshouse.atlassian.net/wiki/spaces/IDV/pages/5146247171/EMail+Service
-
-## 2.0) Prerequisites
-
-This Microservice has the following dependencies:
-
-- [Java 21](https://www.oracle.com/java/technologies/downloads/#java21)
-- [Maven](https://maven.apache.org/download.cgi)
-
-
-
-
-
-# OWASP Dependency check
-
-to run a check for dependency security vulnerabilities run the following command:
-
-```shell
-mvn dependency-check:check
+```mermaid
+flowchart LR
+    ExternalApp["External CHS App"] -->|REST| Module1
+    Module1["sender-api"] -->|Kafka| Module2
+    Module2["📌 kafka-consumer"] -->|REST| Module3
+    Module3["govuk-notify-api"] -->|REST| GovUKNotify
+    GovUKNotify["GovUK Notify"]
+    
+    subgraph PoseidonSystem["🔱 chs-notification"]
+        Module1
+        Module2
+        Module3
+    end
+    
+    %% Styling for all elements - light/dark mode compatible
+    classDef normal fill:#f8f8f8,stroke:#666666,stroke-width:1px,color:#333333,rx:4,ry:4
+    classDef current fill:#0099cc,stroke:#007799,stroke-width:2px,color:white,rx:4,ry:4
+    classDef external fill:#e6e6e6,stroke:#999999,stroke-width:1px,color:#333333,rx:4,ry:4
+    classDef system fill:transparent,stroke:#0077b6,stroke-width:1.5px,stroke-dasharray:3 3,color:#00a8e8,rx:10,ry:10
+    
+    class Module1 normal;
+    class Module2 current;
+    class Module3 normal;
+    class ExternalApp external;
+    class GovUKNotify external;
+    class PoseidonSystem system;
+    %% Adding clickable links to GitHub repos
+    click Module1 "https://github.com/companieshouse/chs-notification-sender-api" _blank
+    click Module3 "https://github.com/companieshouse/chs-gov-uk-notify-integration-api" _blank
 ```
 
-# Endpoints
+## Overview
 
-The remainder of this section lists the endpoints that are available in this microservice, and provides links to
-detailed documentation about these endpoints e.g. required headers, path variables, query params, request bodies, and
-their behaviour.
+This service:
+- Consumes notification messages from Kafka topics
+- Forwards messages to chs-gov-uk-notify-integration-api (Module 3) via REST
+- Is Module 2 of 3 in the [chs-notification system](https://companieshouse.atlassian.net/wiki/spaces/IDV/pages/5146247171/EMail+Service)
 
-| Method | Path     | Description                                 | Documentation                                                                                                                                                                |
-|--------|----------|---------------------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| GET    | http://127.0.0.1:9000/actuator/health | this endpoint is used to check that the service is running | |
+## Related Services
+
+- [chs-notification-sender-api](https://github.com/companieshouse/chs-notification-sender-api) (Module 1, accepts email/letter requests via REST and publishes to Kafka topics consumed by Module 2)
+- [chs-gov-uk-notify-integration-api](https://github.com/companieshouse/chs-gov-uk-notify-integration-api) (Module 3, receives requests from Module 2 via REST and sends to GovUK Notify via REST)
+
+## API Integration
+
+Sends email and letter requests to chs-gov-uk-notify-integration-api (Module 3).
+
+- [View API documentation](https://github.com/companieshouse/private.api.ch.gov.uk-specifications/blob/master/generated_sources/docs/chs-gov-uk-notify-integration-api/Apis/NotificationSenderApi.md)
+
+## Endpoints
+
+The service exposes the following endpoints:
+
+- **Service health**: `GET /notification-consumer/healthcheck`
+
+## Prerequisites
+
+- Java 21
+- Maven
+
+## Running Locally
+
+### Prerequisites
+Start a Kafka broker to allow messages to be consumed:
+```bash
+docker compose up KafkaBroker
+```
+
+### Running the Application
+
+#### Option 1: Using IntelliJ IDEA
+1. Open the project in IntelliJ
+2. Set Project SDK to Java 21
+3. Locate the main application class: [ChsNotificationKafkaConsumerApplication.java](src/main/java/uk/gov/companieshouse/chs/notification/kafka/consumer/ChsNotificationKafkaConsumerApplication.java)
+4. Right-click and select "Run" or "Debug"
+
+#### Option 2: Using Maven CLI
+```bash
+mvn spring-boot:run
+```
 
 
+
+## Repository Structure
+
+```
+chs-notification-kafka-consumer/
+│── src/                    
+│   ├── main/               # Main application code
+│   └── test/               # Test code
+│── pom.xml                 # Dependencies
+│── ecs-image-build/        # ECS Dockerfile
+│── terraform/              # Infrastructure code
+│── ...                     # Other files/folders
+└── README.md               # This file
+```
