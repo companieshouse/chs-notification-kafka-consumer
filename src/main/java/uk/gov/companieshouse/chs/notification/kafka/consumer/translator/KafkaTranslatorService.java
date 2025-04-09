@@ -43,7 +43,10 @@ class KafkaTranslatorService implements KafkaTranslatorInterface {
     @Override
     public GovUkEmailDetailsRequest translateEmailKafkaMessage(final byte[] emailMessage) {
         try {
-            return convertAvroToGovUkNotifyEmailRequest(emailMessage);
+            LOGGER.info("about to convert to govuk email request");
+            GovUkEmailDetailsRequest govUkEmailDetailsRequest = convertAvroToGovUkNotifyEmailRequest(emailMessage);
+            LOGGER.info("successfully translated to govuk email request");
+            return govUkEmailDetailsRequest;
         } catch (Exception ex) {
             LOGGER.error("Unable to deserialise emailMessage:", ex);
             throw new NonRetryableErrorException(
@@ -54,7 +57,10 @@ class KafkaTranslatorService implements KafkaTranslatorInterface {
     @Override
     public GovUkLetterDetailsRequest translateLetterKafkaMessage(final byte[] letterMessage) {
         try {
-            return convertAvroToGovUkNotifyLetterRequest(letterMessage);
+            LOGGER.info("about to convert to govuk letter request");
+            GovUkLetterDetailsRequest govUkLetterDetailsRequest = convertAvroToGovUkNotifyLetterRequest(letterMessage);
+            LOGGER.info("successfully translated to govuk letter request");
+            return govUkLetterDetailsRequest;
         } catch (Exception ex) {
             LOGGER.error("Unable to deserialise letterMessage:", ex);
             throw new NonRetryableErrorException(
