@@ -11,9 +11,15 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.ApiIntegrationInterface;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.translator.KafkaTranslatorInterface;
+import uk.gov.companieshouse.logging.Logger;
+import uk.gov.companieshouse.logging.LoggerFactory;
+
+import static uk.gov.companieshouse.chs.notification.kafka.consumer.utils.StaticPropertyUtil.APPLICATION_NAMESPACE;
 
 @Service
 class KafkaConsumerService {
+
+    private static final Logger LOG = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
     private final KafkaTranslatorInterface kafkaTranslatorInterface;
 
@@ -40,9 +46,12 @@ class KafkaConsumerService {
             groupId = "${kafka.group-id.email}",
             containerFactory = "listenerContainerFactoryEmail")
     public void consumeEmailMessage(ConsumerRecord<String, byte[]> record, Acknowledgment acknowledgment) {
+        LOG.info("Consuming email message");
         if(record !=null && record.value() !=null && record.value().length !=0) {
             final var emailRequest = kafkaTranslatorInterface.translateEmailKafkaMessage(record.value());
+            LOG.info("Translated email request");
             apiIntegrationInterface.sendEmailMessageToIntegrationApi(emailRequest, acknowledgment::acknowledge);
+            LOG.info("Sent email message to integration API");
         } else {
             throw new IllegalArgumentException("Received null or empty Email message");
         }
@@ -64,9 +73,12 @@ class KafkaConsumerService {
             groupId = "${kafka.group-id.letter}",
             containerFactory = "listenerContainerFactoryLetter")
     public void consumeLetterMessage(ConsumerRecord<String, byte[]> record, Acknowledgment acknowledgment) {
+        LOG.info("Consuming letter message");
         if(record !=null && record.value() !=null && record.value().length !=0) {
             final var letterRequest = kafkaTranslatorInterface.translateLetterKafkaMessage(record.value());
+            LOG.info("Translated letter request");
             apiIntegrationInterface.sendLetterMessageToIntegrationApi(letterRequest, acknowledgment::acknowledge);
+            LOG.info("Sent letter message to integration API");
         } else {
             throw new IllegalArgumentException("Received null or empty Letter message");
         }
