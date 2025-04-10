@@ -47,14 +47,31 @@ class KafkaConsumerService {
             containerFactory = "listenerContainerFactoryEmail")
     public void consumeEmailMessage(ConsumerRecord<String, byte[]> record, Acknowledgment acknowledgment) {
         LOG.info("Consuming email message");
-        if(record !=null && record.value() !=null && record.value().length !=0) {
-            final var emailRequest = kafkaTranslatorInterface.translateEmailKafkaMessage(record.value());
-            LOG.info("Translated email request");
-            apiIntegrationInterface.sendEmailMessageToIntegrationApi(emailRequest, acknowledgment::acknowledge);
-            LOG.info("Sent email message to integration API");
-        } else {
-            throw new IllegalArgumentException("Received null or empty Email message");
+
+        // TODO: don't acknowledge null or empty records, figure out WHY they are null, and prevent it from happening
+        if (record == null) {
+            LOG.info("Record is null, acknowledging message");
+            acknowledgment.acknowledge();
+            return;
         }
+
+        if (record.value() == null) {
+            LOG.info("Record value is null, acknowledging message");
+            acknowledgment.acknowledge();
+            return;
+        }
+
+        if (record.value().length == 0) {
+            LOG.info("Record value is empty, acknowledging message");
+            acknowledgment.acknowledge();
+            return;
+        }
+
+        LOG.info("Record is valid, and has data");
+        final var emailRequest = kafkaTranslatorInterface.translateEmailKafkaMessage(record.value());
+        LOG.info("Translated letter request");
+        apiIntegrationInterface.sendEmailMessageToIntegrationApi(emailRequest, acknowledgment::acknowledge);
+        LOG.info("Sent letter message to integration API");
     }
 
     /**
@@ -74,13 +91,30 @@ class KafkaConsumerService {
             containerFactory = "listenerContainerFactoryLetter")
     public void consumeLetterMessage(ConsumerRecord<String, byte[]> record, Acknowledgment acknowledgment) {
         LOG.info("Consuming letter message");
-        if(record !=null && record.value() !=null && record.value().length !=0) {
-            final var letterRequest = kafkaTranslatorInterface.translateLetterKafkaMessage(record.value());
-            LOG.info("Translated letter request");
-            apiIntegrationInterface.sendLetterMessageToIntegrationApi(letterRequest, acknowledgment::acknowledge);
-            LOG.info("Sent letter message to integration API");
-        } else {
-            throw new IllegalArgumentException("Received null or empty Letter message");
+
+        // TODO: don't acknowledge null or empty records, figure out WHY they are null, and prevent it from happening
+        if (record == null) {
+            LOG.info("Record is null, acknowledging message");
+            acknowledgment.acknowledge();
+            return;
         }
+
+        if (record.value() == null) {
+            LOG.info("Record value is null, acknowledging message");
+            acknowledgment.acknowledge();
+            return;
+        }
+
+        if (record.value().length == 0) {
+            LOG.info("Record value is empty, acknowledging message");
+            acknowledgment.acknowledge();
+            return;
+        }
+
+        LOG.info("Record is valid, and has data");
+        final var letterRequest = kafkaTranslatorInterface.translateLetterKafkaMessage(record.value());
+        LOG.info("Translated letter request");
+        apiIntegrationInterface.sendLetterMessageToIntegrationApi(letterRequest, acknowledgment::acknowledge);
+        LOG.info("Sent letter message to integration API");
     }
 }
