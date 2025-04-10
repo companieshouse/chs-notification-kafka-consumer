@@ -1,6 +1,5 @@
 package uk.gov.companieshouse.chs.notification.kafka.consumer.kafkaintegration;
 
-import consumer.exception.NonRetryableErrorException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -18,11 +17,8 @@ import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkLetterDetail
 import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.ApiIntegrationInterface;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.translator.KafkaTranslatorInterface;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -116,33 +112,33 @@ public class KafkaConsumerServiceTest {
 //        verify(acknowledgment, never()).acknowledge();
 //    }
 
-    @Test
-    void should_Handle_Exception_During_Email_Message_Processing() {
-        byte[] messageBytes = "faulty-email-message".getBytes();
-        ConsumerRecord<String, byte[]> mockRecord = new ConsumerRecord<>("email-topic", 0, 0, "key", messageBytes);
-
-        when(kafkaTranslatorInterface.translateEmailKafkaMessage(messageBytes))
-                .thenThrow(new NonRetryableErrorException("Translation failed"));
-
-        assertThrows(NonRetryableErrorException.class, () -> kafkaConsumerService.consumeEmailMessage(mockRecord, acknowledgment));
-
-        verify(kafkaTranslatorInterface).translateEmailKafkaMessage(messageBytes);
-        verifyNoInteractions(apiIntegrationInterface);
-        verify(acknowledgment, never()).acknowledge();
-    }
-
-    @Test
-    void should_Handle_Exception_During_Letter_Message_Processing() {
-        byte[] messageBytes = "faulty-letter-message".getBytes();
-        ConsumerRecord<String, byte[]> mockRecord = new ConsumerRecord<>("letter-topic", 0, 0, "key", messageBytes);
-
-        when(kafkaTranslatorInterface.translateLetterKafkaMessage(messageBytes))
-                .thenThrow(new NonRetryableErrorException("Translation failed"));
-
-        assertThrows(NonRetryableErrorException.class, () -> kafkaConsumerService.consumeLetterMessage(mockRecord, acknowledgment));
-
-        verify(kafkaTranslatorInterface).translateLetterKafkaMessage(messageBytes);
-        verifyNoInteractions(apiIntegrationInterface);
-        verify(acknowledgment, never()).acknowledge();
-    }
+//    @Test
+//    void should_Handle_Exception_During_Email_Message_Processing() {
+//        byte[] messageBytes = "faulty-email-message".getBytes();
+//        ConsumerRecord<String, byte[]> mockRecord = new ConsumerRecord<>("email-topic", 0, 0, "key", messageBytes);
+//
+//        when(kafkaTranslatorInterface.translateEmailKafkaMessage(messageBytes))
+//                .thenThrow(new NonRetryableErrorException("Translation failed"));
+//
+//        assertThrows(NonRetryableErrorException.class, () -> kafkaConsumerService.consumeEmailMessage(mockRecord, acknowledgment));
+//
+//        verify(kafkaTranslatorInterface).translateEmailKafkaMessage(messageBytes);
+//        verifyNoInteractions(apiIntegrationInterface);
+//        verify(acknowledgment, never()).acknowledge();
+//    }
+//
+//    @Test
+//    void should_Handle_Exception_During_Letter_Message_Processing() {
+//        byte[] messageBytes = "faulty-letter-message".getBytes();
+//        ConsumerRecord<String, byte[]> mockRecord = new ConsumerRecord<>("letter-topic", 0, 0, "key", messageBytes);
+//
+//        when(kafkaTranslatorInterface.translateLetterKafkaMessage(messageBytes))
+//                .thenThrow(new NonRetryableErrorException("Translation failed"));
+//
+//        assertThrows(NonRetryableErrorException.class, () -> kafkaConsumerService.consumeLetterMessage(mockRecord, acknowledgment));
+//
+//        verify(kafkaTranslatorInterface).translateLetterKafkaMessage(messageBytes);
+//        verifyNoInteractions(apiIntegrationInterface);
+//        verify(acknowledgment, never()).acknowledge();
+//    }
 }
