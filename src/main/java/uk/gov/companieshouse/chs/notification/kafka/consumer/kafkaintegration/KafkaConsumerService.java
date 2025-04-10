@@ -10,9 +10,11 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.ApiIntegrationInterface;
-import uk.gov.companieshouse.chs.notification.kafka.consumer.translator.KafkaTranslatorInterface;
+import uk.gov.companieshouse.chs.notification.kafka.consumer.translator.MessageMapper;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+import uk.gov.companieshouse.notification.ChsEmailNotification;
+import uk.gov.companieshouse.notification.ChsLetterNotification;
 
 import static uk.gov.companieshouse.chs.notification.kafka.consumer.utils.StaticPropertyUtil.APPLICATION_NAMESPACE;
 
@@ -21,12 +23,11 @@ class KafkaConsumerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
-    private final KafkaTranslatorInterface kafkaTranslatorInterface;
-
+    private final MessageMapper messageMapper;
     private final ApiIntegrationInterface apiIntegrationInterface;
 
-    public KafkaConsumerService(KafkaTranslatorInterface kafkaTranslatorInterface, ApiIntegrationInterface apiIntegrationInterface) {
-        this.kafkaTranslatorInterface = kafkaTranslatorInterface;
+    public KafkaConsumerService(MessageMapper messageMapper, ApiIntegrationInterface apiIntegrationInterface) {
+        this.messageMapper = messageMapper;
         this.apiIntegrationInterface = apiIntegrationInterface;
     }
 
@@ -45,16 +46,11 @@ class KafkaConsumerService {
     @KafkaListener(topics = "${kafka.topic.email}",
             groupId = "${kafka.group-id.email}",
             containerFactory = "listenerContainerFactoryEmail")
-    public void consumeEmailMessage(ConsumerRecord<String, byte[]> consumerRecord, Acknowledgment acknowledgment) {
-        try {
-            LOG.info("Consuming email message");
-            final var emailRequest = kafkaTranslatorInterface.translateEmailKafkaMessage(consumerRecord.value());
-            LOG.info("Translated letter request");
-            apiIntegrationInterface.sendEmailMessageToIntegrationApi(emailRequest, acknowledgment::acknowledge);
-            LOG.info("Sent letter message to integration API");
-        } catch (Exception e) {
-            LOG.error(e);
-        }
+    public void consumeEmailMessage(ConsumerRecord<String, ChsEmailNotification> consumerRecord, Acknowledgment acknowledgment) {
+        LOG.info("Consuming letter message");
+        final var emailRequest = messageMapper.mapToEmailDetailsRequest(consumerRecord.value());
+        apiIntegrationInterface.sendEmailMessageToIntegrationApi(emailRequest, acknowledgment::acknowledge);
+        LOG.info("Sent letter message to integration API");
     }
 
     /**
@@ -72,15 +68,10 @@ class KafkaConsumerService {
     @KafkaListener(topics = "${kafka.topic.letter}",
             groupId = "${kafka.group-id.letter}",
             containerFactory = "listenerContainerFactoryLetter")
-    public void consumeLetterMessage(ConsumerRecord<String, byte[]> consumerRecord, Acknowledgment acknowledgment) {
-        try {
-            LOG.info("Consuming letter message");
-            final var letterRequest = kafkaTranslatorInterface.translateLetterKafkaMessage(consumerRecord.value());
-            LOG.info("Translated letter request");
-            apiIntegrationInterface.sendLetterMessageToIntegrationApi(letterRequest, acknowledgment::acknowledge);
-            LOG.info("Sent letter message to integration API");
-        } catch (Exception e) {
-            LOG.error(e);
-        }
+    public void consumeLetterMessage(ConsumerRecord<String, ChsLetterNotification> consumerRecord, Acknowledgment acknowledgment) {
+        LOG.info("Consuming letter message");
+        final var letterRequest = messageMapper.mapToLetterDetailsRequest(consumerRecord.value());
+        apiIntegrationInterface.sendLetterMessageToIntegrationApi(letterRequest, acknowledgment::acknowledge);
+        LOG.info("Sent letter message to integration API");
     }
 }

@@ -1,5 +1,4 @@
 version: '3.3'
-name: EmailService
 services:
   KafkaBroker:
     image: bitnami/kafka:latest

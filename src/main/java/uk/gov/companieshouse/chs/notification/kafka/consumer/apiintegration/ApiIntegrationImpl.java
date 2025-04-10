@@ -5,10 +5,10 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkEmailDetailsRequest;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkLetterDetailsRequest;
-import static uk.gov.companieshouse.chs.notification.kafka.consumer.utils.StaticPropertyUtil.APPLICATION_NAMESPACE;
-
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+
+import static uk.gov.companieshouse.chs.notification.kafka.consumer.utils.StaticPropertyUtil.APPLICATION_NAMESPACE;
 
 @Service
 class ApiIntegrationImpl implements ApiIntegrationInterface {
@@ -24,7 +24,6 @@ class ApiIntegrationImpl implements ApiIntegrationInterface {
     @Override
     public void sendEmailMessageToIntegrationApi(final GovUkEmailDetailsRequest govUkEmailDetailsRequest,
                                                  final Runnable onSuccess) {
-        LOG.info("about to send email message req to integration api");
         integrationWebClient.post()
                 .uri("/chs-gov-uk-notify-integration-api/email")
                 .header("Content-Type", "application/json")
@@ -40,13 +39,11 @@ class ApiIntegrationImpl implements ApiIntegrationInterface {
                     return Mono.empty();
                 })
                 .subscribe();
-        LOG.info("end of sendEmailMessageToIntegrationApi method");
     }
 
     @Override
     public void sendLetterMessageToIntegrationApi(final GovUkLetterDetailsRequest govUkLetterDetailsRequest,
                                                   final Runnable onSuccess) {
-        LOG.info("about to send email message req to letter api");
         integrationWebClient.post()
                 .uri("/chs-gov-uk-notify-integration-api/letter")
                 .header("Content-Type", "application/json")
@@ -62,6 +59,5 @@ class ApiIntegrationImpl implements ApiIntegrationInterface {
                     return Mono.empty();
                 })
                 .subscribe();
-        LOG.info("end of sendLetterMessageToIntegrationApi method");
     }
 }
