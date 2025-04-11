@@ -10,18 +10,22 @@ public class IntegrationWebClientConfig {
 
     private final String internalApiUrl;
     private final String chsInternalApiKey;
+    private final String notifyIntegrationApiBasePath;
 
     public IntegrationWebClientConfig(
-            @Value("${internal.api.url}") String internalApiUrl,
-            @Value("${chs.internal.api.key}") String chsInternalApiKey) {
-        this.internalApiUrl = internalApiUrl;
+            @Value("${chs.internal.api.key}") final String chsInternalApiKey,
+            @Value("${internal.api.url}") final String internalApiUrl,
+            @Value("${notify.integration.path:/gov-uk-notify-integration}") final String notifyIntegrationApiBasePath
+    ) {
         this.chsInternalApiKey = chsInternalApiKey;
+        this.internalApiUrl = internalApiUrl;
+        this.notifyIntegrationApiBasePath = notifyIntegrationApiBasePath;
     }
 
     @Bean
     public WebClient integrationWebClient() {
         return WebClient.builder()
-                .baseUrl(internalApiUrl)
+                .baseUrl(internalApiUrl + notifyIntegrationApiBasePath)
                 .defaultHeader("Authorization", chsInternalApiKey)
                 .build();
     }

@@ -7,13 +7,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkEmailDetailsRequest;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkLetterDetailsRequest;
-import org.springframework.http.ResponseEntity;
 
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,11 +34,8 @@ class ApiIntegrationImplTest {
     @Mock
     private WebClient.ResponseSpec responseSpec;
 
-    @Mock
-    private Runnable callback;
-
     @InjectMocks
-    private ApiIntegrationImpl apiIntegrationImpl;
+    private NotifyIntegrationService apiIntegrationImpl;
 
     @Test
     void When_EmailRequestIsValid_Expect_EmailMessageIsSentSuccessfully() {
@@ -47,16 +43,16 @@ class ApiIntegrationImplTest {
         ResponseEntity<Void> responseEntity = ResponseEntity.ok().build();
 
         Mockito.doReturn(requestBodyUriSpec).when(integrationWebClient).post();
-        Mockito.doReturn(requestBodySpec).when(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
+        Mockito.doReturn(requestBodySpec).when(requestBodyUriSpec).uri("/email");
         Mockito.doReturn(requestBodySpec).when(requestBodySpec).header("Content-Type", "application/json");
         Mockito.doReturn(requestHeadersSpec).when(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
         Mockito.doReturn(responseSpec).when(requestHeadersSpec).retrieve();
         Mockito.doReturn(Mono.just(responseEntity)).when(responseSpec).toBodilessEntity();
 
-        apiIntegrationImpl.sendEmailMessageToIntegrationApi(govUkEmailDetailsRequest, callback);
+        apiIntegrationImpl.sendEmailMessageToIntegrationApi(govUkEmailDetailsRequest);
 
         verify(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
-        verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
+        verify(requestBodyUriSpec).uri("/email");
         verify(requestHeadersSpec).retrieve();
         verify(responseSpec).toBodilessEntity();
     }
@@ -66,19 +62,18 @@ class ApiIntegrationImplTest {
         GovUkEmailDetailsRequest govUkEmailDetailsRequest = new GovUkEmailDetailsRequest();
 
         Mockito.doReturn(requestBodyUriSpec).when(integrationWebClient).post();
-        Mockito.doReturn(requestBodySpec).when(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
+        Mockito.doReturn(requestBodySpec).when(requestBodyUriSpec).uri("/email");
         Mockito.doReturn(requestBodySpec).when(requestBodySpec).header("Content-Type", "application/json");
         Mockito.doReturn(requestHeadersSpec).when(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
         Mockito.doReturn(responseSpec).when(requestHeadersSpec).retrieve();
         Mockito.doReturn(Mono.error(new RuntimeException("Error"))).when(responseSpec).toBodilessEntity();
 
-        apiIntegrationImpl.sendEmailMessageToIntegrationApi(govUkEmailDetailsRequest, callback);
+        apiIntegrationImpl.sendEmailMessageToIntegrationApi(govUkEmailDetailsRequest);
 
         verify(requestBodySpec).bodyValue(govUkEmailDetailsRequest);
-        verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/email");
+        verify(requestBodyUriSpec).uri("/email");
         verify(requestHeadersSpec).retrieve();
         verify(responseSpec).toBodilessEntity();
-        verify(callback, never()).run();
     }
 
     @Test
@@ -87,16 +82,16 @@ class ApiIntegrationImplTest {
         ResponseEntity<Void> responseEntity = ResponseEntity.ok().build();
 
         Mockito.doReturn(requestBodyUriSpec).when(integrationWebClient).post();
-        Mockito.doReturn(requestBodySpec).when(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");
+        Mockito.doReturn(requestBodySpec).when(requestBodyUriSpec).uri("/letter");
         Mockito.doReturn(requestBodySpec).when(requestBodySpec).header("Content-Type", "application/json");
         Mockito.doReturn(requestHeadersSpec).when(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
         Mockito.doReturn(responseSpec).when(requestHeadersSpec).retrieve();
         Mockito.doReturn(Mono.just(responseEntity)).when(responseSpec).toBodilessEntity();
 
-        apiIntegrationImpl.sendLetterMessageToIntegrationApi(govUkLetterDetailsRequest, callback);
+        apiIntegrationImpl.sendLetterMessageToIntegrationApi(govUkLetterDetailsRequest);
 
         verify(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
-        verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");
+        verify(requestBodyUriSpec).uri("/letter");
         verify(requestHeadersSpec).retrieve();
         verify(responseSpec).toBodilessEntity();
     }
@@ -106,18 +101,17 @@ class ApiIntegrationImplTest {
         GovUkLetterDetailsRequest govUkLetterDetailsRequest = new GovUkLetterDetailsRequest();
 
         Mockito.doReturn(requestBodyUriSpec).when(integrationWebClient).post();
-        Mockito.doReturn(requestBodySpec).when(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");
+        Mockito.doReturn(requestBodySpec).when(requestBodyUriSpec).uri("/letter");
         Mockito.doReturn(requestBodySpec).when(requestBodySpec).header("Content-Type", "application/json");
         Mockito.doReturn(requestHeadersSpec).when(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
         Mockito.doReturn(responseSpec).when(requestHeadersSpec).retrieve();
         Mockito.doReturn(Mono.error(new RuntimeException("Error"))).when(responseSpec).toBodilessEntity();
 
-        apiIntegrationImpl.sendLetterMessageToIntegrationApi(govUkLetterDetailsRequest, callback);
+        apiIntegrationImpl.sendLetterMessageToIntegrationApi(govUkLetterDetailsRequest);
 
         verify(requestBodySpec).bodyValue(govUkLetterDetailsRequest);
-        verify(requestBodyUriSpec).uri("/chs-gov-uk-notify-integration-api/letter");
+        verify(requestBodyUriSpec).uri("/letter");
         verify(requestHeadersSpec).retrieve();
         verify(responseSpec).toBodilessEntity();
-        verify(callback, never()).run();
     }
 }
