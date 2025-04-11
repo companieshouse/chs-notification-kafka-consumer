@@ -1,5 +1,6 @@
 package uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -24,41 +25,23 @@ public class NotifyIntegrationService {
         this.notifyIntegrationWebClient = integrationWebClient;
     }
 
-    public void sendEmailMessageToIntegrationApi(@NotNull final GovUkEmailDetailsRequest govUkEmailDetailsRequest,
-                                                 @NotNull final Runnable onSuccess) {
-        notifyIntegrationWebClient.post()
+    public Mono<Void> sendEmailMessageToIntegrationApi(@NotNull @Valid final GovUkEmailDetailsRequest govUkEmailDetailsRequest) {
+        return notifyIntegrationWebClient.post()
                 .uri("/email")
                 .header("Content-Type", "application/json")
                 .bodyValue(govUkEmailDetailsRequest)
                 .retrieve()
                 .toBodilessEntity()
-                .doOnSuccess(response -> {
-                    LOG.info("Successfully sent email request to integration API");
-                    onSuccess.run();
-                })
-                .onErrorResume(e -> {
-                    LOG.error("Failed to send email request to integration API: " + e.getMessage());
-                    return Mono.empty();
-                })
-                .subscribe();
+                .then();
     }
 
-    public void sendLetterMessageToIntegrationApi(@NotNull final GovUkLetterDetailsRequest govUkLetterDetailsRequest,
-                                                  @NotNull final Runnable onSuccess) {
-        notifyIntegrationWebClient.post()
+    public Mono<Void> sendLetterMessageToIntegrationApi(@NotNull @Valid final GovUkLetterDetailsRequest govUkLetterDetailsRequest) {
+        return notifyIntegrationWebClient.post()
                 .uri("/letter")
                 .header("Content-Type", "application/json")
                 .bodyValue(govUkLetterDetailsRequest)
                 .retrieve()
                 .toBodilessEntity()
-                .doOnSuccess(response -> {
-                    LOG.info("Successfully sent letter request to integration API");
-                    onSuccess.run();
-                })
-                .onErrorResume(e -> {
-                    LOG.error("Failed to send letter request to integration API: " + e.getMessage());
-                    return Mono.empty();
-                })
-                .subscribe();
+                .then();
     }
 }
