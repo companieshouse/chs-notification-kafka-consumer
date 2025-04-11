@@ -1,6 +1,8 @@
 package uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration;
 
+import jakarta.validation.constraints.NotNull;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkEmailDetailsRequest;
@@ -10,22 +12,22 @@ import uk.gov.companieshouse.logging.LoggerFactory;
 
 import static uk.gov.companieshouse.chs.notification.kafka.consumer.utils.StaticPropertyUtil.APPLICATION_NAMESPACE;
 
+@Validated
 @Service
-class ApiIntegrationImpl implements ApiIntegrationInterface {
-
-    private final WebClient integrationWebClient;
+public class NotifyIntegrationService {
 
     private static final Logger LOG = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
-    public ApiIntegrationImpl(final WebClient integrationWebClient) {
-        this.integrationWebClient = integrationWebClient;
+    private final WebClient notifyIntegrationWebClient;
+
+    public NotifyIntegrationService(final WebClient integrationWebClient) {
+        this.notifyIntegrationWebClient = integrationWebClient;
     }
 
-    @Override
-    public void sendEmailMessageToIntegrationApi(final GovUkEmailDetailsRequest govUkEmailDetailsRequest,
-                                                 final Runnable onSuccess) {
-        integrationWebClient.post()
-                .uri("/chs-gov-uk-notify-integration-api/email")
+    public void sendEmailMessageToIntegrationApi(@NotNull final GovUkEmailDetailsRequest govUkEmailDetailsRequest,
+                                                 @NotNull final Runnable onSuccess) {
+        notifyIntegrationWebClient.post()
+                .uri("/email")
                 .header("Content-Type", "application/json")
                 .bodyValue(govUkEmailDetailsRequest)
                 .retrieve()
@@ -41,11 +43,10 @@ class ApiIntegrationImpl implements ApiIntegrationInterface {
                 .subscribe();
     }
 
-    @Override
-    public void sendLetterMessageToIntegrationApi(final GovUkLetterDetailsRequest govUkLetterDetailsRequest,
-                                                  final Runnable onSuccess) {
-        integrationWebClient.post()
-                .uri("/chs-gov-uk-notify-integration-api/letter")
+    public void sendLetterMessageToIntegrationApi(@NotNull final GovUkLetterDetailsRequest govUkLetterDetailsRequest,
+                                                  @NotNull final Runnable onSuccess) {
+        notifyIntegrationWebClient.post()
+                .uri("/letter")
                 .header("Content-Type", "application/json")
                 .bodyValue(govUkLetterDetailsRequest)
                 .retrieve()

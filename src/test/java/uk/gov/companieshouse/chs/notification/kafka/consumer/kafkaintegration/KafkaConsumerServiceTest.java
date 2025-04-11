@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.support.Acknowledgment;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkEmailDetailsRequest;
 import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkLetterDetailsRequest;
-import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.ApiIntegrationInterface;
+import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.NotifyIntegrationService;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.translator.MessageMapper;
 import uk.gov.companieshouse.notification.ChsEmailNotification;
 import uk.gov.companieshouse.notification.ChsLetterNotification;
@@ -35,7 +35,7 @@ public class KafkaConsumerServiceTest {
     private MessageMapper messageMapper;
 
     @Mock
-    private ApiIntegrationInterface apiIntegrationInterface;
+    private NotifyIntegrationService notifyIntegrationService;
 
     @Mock
     private Acknowledgment acknowledgment;
@@ -68,7 +68,7 @@ public class KafkaConsumerServiceTest {
         kafkaConsumerService.consumeEmailMessage(record, acknowledgment);
 
         verify(messageMapper).mapToEmailDetailsRequest(mockEmailNotification);
-        verify(apiIntegrationInterface).sendEmailMessageToIntegrationApi(
+        verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(
                 eq(mockEmailRequest),
                 runnableCaptor.capture()
         );
@@ -86,7 +86,7 @@ public class KafkaConsumerServiceTest {
         kafkaConsumerService.consumeLetterMessage(record, acknowledgment);
 
         verify(messageMapper).mapToLetterDetailsRequest(mockLetterNotification);
-        verify(apiIntegrationInterface).sendLetterMessageToIntegrationApi(
+        verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(
                 eq(mockLetterRequest),
                 runnableCaptor.capture()
         );
@@ -103,7 +103,7 @@ public class KafkaConsumerServiceTest {
         assertThrows(RuntimeException.class, () -> kafkaConsumerService.consumeEmailMessage(record, acknowledgment));
 
         verify(messageMapper).mapToEmailDetailsRequest(mockEmailNotification);
-        verifyNoInteractions(apiIntegrationInterface);
+        verifyNoInteractions(notifyIntegrationService);
         verify(acknowledgment, never()).acknowledge();
     }
 
@@ -115,7 +115,7 @@ public class KafkaConsumerServiceTest {
         assertThrows(RuntimeException.class, () -> kafkaConsumerService.consumeLetterMessage(record, acknowledgment));
 
         verify(messageMapper).mapToLetterDetailsRequest(mockLetterNotification);
-        verifyNoInteractions(apiIntegrationInterface);
+        verifyNoInteractions(notifyIntegrationService);
         verify(acknowledgment, never()).acknowledge();
     }
 }

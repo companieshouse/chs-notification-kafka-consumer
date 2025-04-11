@@ -9,7 +9,7 @@ import org.springframework.kafka.retrytopic.SameIntervalTopicReuseStrategy;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
-import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.ApiIntegrationInterface;
+import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.NotifyIntegrationService;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.translator.MessageMapper;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
@@ -24,11 +24,11 @@ class KafkaConsumerService {
     private static final Logger LOG = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
     private final MessageMapper messageMapper;
-    private final ApiIntegrationInterface apiIntegrationInterface;
+    private final NotifyIntegrationService notifyIntegrationService;
 
-    public KafkaConsumerService(MessageMapper messageMapper, ApiIntegrationInterface apiIntegrationInterface) {
+    public KafkaConsumerService(MessageMapper messageMapper, NotifyIntegrationService apiIntegrationInterface) {
         this.messageMapper = messageMapper;
-        this.apiIntegrationInterface = apiIntegrationInterface;
+        this.notifyIntegrationService = apiIntegrationInterface;
     }
 
     /**
@@ -47,10 +47,9 @@ class KafkaConsumerService {
             groupId = "${kafka.group-id.email}",
             containerFactory = "listenerContainerFactoryEmail")
     public void consumeEmailMessage(ConsumerRecord<String, ChsEmailNotification> consumerRecord, Acknowledgment acknowledgment) {
-        LOG.info("Consuming letter message");
+        LOG.info("Consuming email message");
         final var emailRequest = messageMapper.mapToEmailDetailsRequest(consumerRecord.value());
-        apiIntegrationInterface.sendEmailMessageToIntegrationApi(emailRequest, acknowledgment::acknowledge);
-        LOG.info("Sent letter message to integration API");
+        notifyIntegrationService.sendEmailMessageToIntegrationApi(emailRequest, acknowledgment::acknowledge);
     }
 
     /**
@@ -71,7 +70,6 @@ class KafkaConsumerService {
     public void consumeLetterMessage(ConsumerRecord<String, ChsLetterNotification> consumerRecord, Acknowledgment acknowledgment) {
         LOG.info("Consuming letter message");
         final var letterRequest = messageMapper.mapToLetterDetailsRequest(consumerRecord.value());
-        apiIntegrationInterface.sendLetterMessageToIntegrationApi(letterRequest, acknowledgment::acknowledge);
-        LOG.info("Sent letter message to integration API");
+        notifyIntegrationService.sendLetterMessageToIntegrationApi(letterRequest, acknowledgment::acknowledge);
     }
 }
