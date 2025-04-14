@@ -10,8 +10,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
-import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkEmailDetailsRequest;
-import uk.gov.companieshouse.api.chs_notification_sender.model.GovUkLetterDetailsRequest;
+import uk.gov.companieshouse.api.chs.notification.model.GovUkEmailDetailsRequest;
+import uk.gov.companieshouse.api.chs.notification.model.GovUkLetterDetailsRequest;
 
 import static org.mockito.Mockito.verify;
 
