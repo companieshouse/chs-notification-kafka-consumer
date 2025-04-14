@@ -6,7 +6,7 @@ locals {
   service_name               = "chs-notification-kafka-consumer"
   container_port             = "8080" # default Java port to match start script
   docker_repo                = "chs-notification-kafka-consumer"
-  lb_listener_rule_priority  = 24
+  lb_listener_rule_priority  = 25
   lb_listener_paths          = ["/notification-consumer/healthcheck"]
   healthcheck_path           = "/notification-consumer/healthcheck" #healthcheck path for chs-notification-kafka-consumer service
   healthcheck_matcher        = "200"
