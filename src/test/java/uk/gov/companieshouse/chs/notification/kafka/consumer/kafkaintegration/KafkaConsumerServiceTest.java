@@ -83,7 +83,7 @@ class KafkaConsumerServiceTest {
 
         // Then
         verify(messageMapper).mapToEmailDetailsRequest(mockEmailNotification);
-        verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(eq(mockEmailRequest));
+        verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(mockEmailRequest);
         verify(acknowledgment).acknowledge();
     }
 
@@ -98,7 +98,7 @@ class KafkaConsumerServiceTest {
 
         // Then
         verify(messageMapper).mapToLetterDetailsRequest(mockLetterNotification);
-        verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(eq(mockLetterRequest));
+        verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest);
         verify(acknowledgment).acknowledge();
     }
 

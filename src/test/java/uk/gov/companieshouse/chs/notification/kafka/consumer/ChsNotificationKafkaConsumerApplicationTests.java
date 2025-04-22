@@ -8,6 +8,7 @@ class ChsNotificationKafkaConsumerApplicationTests {
 
     @Test
     void contextLoads() {
+        // Deliberately do nothing
     }
 
 }
