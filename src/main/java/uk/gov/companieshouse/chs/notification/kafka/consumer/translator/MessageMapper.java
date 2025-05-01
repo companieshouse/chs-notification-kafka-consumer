@@ -17,14 +17,14 @@ import uk.gov.companieshouse.notification.ChsLetterNotification;
 @Mapper(componentModel = "spring")
 public interface MessageMapper {
 
-    @Mapping(source = "createdAt", target = "createdAt", qualifiedByName = "instantToOffsetDateTime")
+    @Mapping(source = "createdAt", target = "createdAt", qualifiedByName = "stringToOffsetDateTime")
     GovUkEmailDetailsRequest mapToEmailDetailsRequest(ChsEmailNotification chsEmailNotification);
 
-    @Mapping(source = "createdAt", target = "createdAt", qualifiedByName = "instantToOffsetDateTime")
+    @Mapping(source = "createdAt", target = "createdAt", qualifiedByName = "stringToOffsetDateTime")
     GovUkLetterDetailsRequest mapToLetterDetailsRequest(ChsLetterNotification chsLetterNotification);
 
-    @Named("instantToOffsetDateTime")
-    static OffsetDateTime instantToOffsetDateTime(Instant instant) {
-        return instant != null ? OffsetDateTime.ofInstant(instant, ZoneOffset.UTC) : null;
+    @Named("stringToOffsetDateTime")
+    static OffsetDateTime stringToOffsetDateTime(String dateTime) {
+        return dateTime != null ? OffsetDateTime.ofInstant(Instant.parse(dateTime), ZoneOffset.UTC) : null;
     }
 }
