@@ -18,8 +18,8 @@ locals {
   use_set_environment_files                    = var.use_set_environment_files
   s3_config_bucket                             = data.vault_generic_secret.shared_s3.data["config_bucket_name"]
   app_environment_filename                     = "chs-notification-kafka-consumer.env"
-  app_environment_filename_emails_kafka_error  = "chs-notification-email-error"
-  app_environment_filename_letters_kafka_error = "chs-notification-letter-error"
+  app_environment_filename_emails_kafka_error  = "chs-notification-email-kafka-error.env"
+  app_environment_filename_letters_kafka_error = "chs-notification-letter-kafka-error.env"
   vpc_name                                     = local.stack_secrets["vpc_name"]
 
   # Enable Eric
