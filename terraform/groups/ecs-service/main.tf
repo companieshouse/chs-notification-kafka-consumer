@@ -46,9 +46,9 @@ module "ecs-service" {
   health_check_grace_period_seconds = 240
 
   # Service Healthcheck configuration
-  use_task_container_healthcheck    = true
-  healthcheck_path                  = local.healthcheck_path
-  healthcheck_matcher               = local.healthcheck_matcher
+  use_task_container_healthcheck = true
+  healthcheck_path               = local.healthcheck_path
+  healthcheck_matcher            = local.healthcheck_matcher
 
   # Docker container details
   docker_registry   = var.docker_registry
@@ -90,22 +90,22 @@ module "ecs-service" {
   eric_cpus                 = var.eric_cpus
   eric_memory               = var.eric_memory
 
-  depends_on=[module.secrets]
+  depends_on = [module.secrets]
 }
 
 module "ecs-service-kafka-email-error" {
   source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.311"
 
   # Environmental configuration
-  environment                           = var.environment
-  aws_region                            = var.aws_region
-  aws_profile                           = var.aws_profile
-  vpc_id                                = data.aws_vpc.vpc.id
-  ecs_cluster_id                        = data.aws_ecs_cluster.ecs_cluster.id
-  ecs_cluster_arn                       = data.aws_ecs_cluster.ecs_cluster.arn
-  task_execution_role_arn               = data.aws_iam_role.ecs_cluster_iam_role.arn
-  eventbridge_scheduler_role_arn        = data.aws_iam_role.eventbridge_role.arn  
-  batch_service                         = true
+  environment                    = var.environment
+  aws_region                     = var.aws_region
+  aws_profile                    = var.aws_profile
+  vpc_id                         = data.aws_vpc.vpc.id
+  ecs_cluster_id                 = data.aws_ecs_cluster.ecs_cluster.id
+  ecs_cluster_arn                = data.aws_ecs_cluster.ecs_cluster.arn
+  task_execution_role_arn        = data.aws_iam_role.ecs_cluster_iam_role.arn
+  eventbridge_scheduler_role_arn = data.aws_iam_role.eventbridge_role.arn
+  batch_service                  = true
 
   # Scheduler configuration
   enable_scale_up_eventbridge_scheduler   = var.enable_scale_up_eventbridge_scheduler
@@ -144,11 +144,11 @@ module "ecs-service-kafka-email-error" {
 
 
   # Service environment variable and secret configs
-  task_environment                      = local.task_environment
-  task_secrets                          = local.task_secrets
-  app_environment_filename_emails       = local.app_environment_filename_emails_kafka_error
-  app_environment_filename_letters      = local.app_environment_filename_letters_kafka_error
-  use_set_environment_files             = local.use_set_environment_files
+  task_environment                 = local.task_environment
+  task_secrets                     = local.task_secrets
+  app_environment_filename_emails  = local.app_environment_filename_emails_kafka_error
+  app_environment_filename_letters = local.app_environment_filename_letters_kafka_error
+  use_set_environment_files        = local.use_set_environment_files
 
   # Eric variables
   use_eric_reverse_proxy    = true
@@ -165,15 +165,15 @@ module "ecs-service-kafka-letter-error" {
   source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.311"
 
   # Environmental configuration
-  environment                           = var.environment
-  aws_region                            = var.aws_region
-  aws_profile                           = var.aws_profile
-  vpc_id                                = data.aws_vpc.vpc.id
-  ecs_cluster_id                        = data.aws_ecs_cluster.ecs_cluster.id
-  ecs_cluster_arn                       = data.aws_ecs_cluster.ecs_cluster.arn
-  task_execution_role_arn               = data.aws_iam_role.ecs_cluster_iam_role.arn
-  eventbridge_scheduler_role_arn        = data.aws_iam_role.eventbridge_role.arn  
-  batch_service                         = true
+  environment                    = var.environment
+  aws_region                     = var.aws_region
+  aws_profile                    = var.aws_profile
+  vpc_id                         = data.aws_vpc.vpc.id
+  ecs_cluster_id                 = data.aws_ecs_cluster.ecs_cluster.id
+  ecs_cluster_arn                = data.aws_ecs_cluster.ecs_cluster.arn
+  task_execution_role_arn        = data.aws_iam_role.ecs_cluster_iam_role.arn
+  eventbridge_scheduler_role_arn = data.aws_iam_role.eventbridge_role.arn
+  batch_service                  = true
 
   # Scheduler configuration
   enable_scale_up_eventbridge_scheduler   = var.enable_scale_up_eventbridge_scheduler
@@ -212,10 +212,10 @@ module "ecs-service-kafka-letter-error" {
 
 
   # Service environment variable and secret configs
-  task_environment                      = local.task_environment
-  task_secrets                          = local.task_secrets
-  app_environment_filename              = local.app_environment_filename_kafka_error
-  use_set_environment_files             = local.use_set_environment_files
+  task_environment          = local.task_environment
+  task_secrets              = local.task_secrets
+  app_environment_filename  = local.app_environment_filename_kafka_error
+  use_set_environment_files = local.use_set_environment_files
 
   # Eric variables
   use_eric_reverse_proxy    = true
