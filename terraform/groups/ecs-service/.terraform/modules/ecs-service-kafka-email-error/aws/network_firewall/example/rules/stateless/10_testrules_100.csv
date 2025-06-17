@@ -1,0 +1,2 @@
+priority,sources,sourceports,destinations,destinationports,protocols,tcpflags,tcpmasks,actions
+1,10.1.2.0/24;10.4.3.0/24;10.3.2.0/24,80;443-445;8080,10.1.2.0/24;10.4.3.0/24;10.3.2.0/24,80;443-445;8080,6,SYN,SYN;ACK,pass

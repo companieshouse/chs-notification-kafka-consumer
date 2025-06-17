@@ -1,0 +1,20 @@
+priority,name,description,source,sourceports,destination,destinationports,protocol,access,direction
+101,inbound-test1,inbound-test1,10.10.20.30; 10.10.20.31,*,VirtualNetwork,*,*,Allow,Inbound
+108,inbound-test2,inbound-test2,10.10.20.10,*,VirtualNetwork,*,*,Allow,Inbound
+102,inbound-test3,inbound-test3,10.10.20.11,*,VirtualNetwork,*,*,Allow,Inbound
+103,inbound-test4,inbound-test4,VirtualNetwork,*,VirtualNetwork,*,ICMP,Allow,Inbound
+104,inbound-test5,inbound-test5,10.10.50.0/24; 10.10.30.10/32; 10.10.20.50,*,10.10.20.30; 10.10.20.31,100-110,*,Allow,Inbound
+105,inbound-test6,inbound-test6,10.181.93.3; 10.181.93.4; 10.181.105.3; 10.171.231.4,*,10.181.93.90; 10.181.93.89,53-54; 60-61,UDP,Allow,Inbound
+106,inbound-test7,inbound-test7,172.16.21.111; 172.16.21.112; 172.16.21.113; 172.16.21.114; 172.16.21.152,*,10.181.93.90,53; 60,TCP,Allow,Inbound
+107,inbound-test8,inbound-test8,10.50.4.10; 10.50.4.11,*,10.181.93.90,53,UDP,Allow,Inbound
+109,inbound-test9,inbound-test9,172.16.21.247; 172.16.21.240; 172.16.21.245; 172.16.21.246,*,10.181.93.90; 10.181.93.89,*,*,Allow,Inbound
+
+101,outbound-test1,outbound-test1,10.10.20.30; 10.10.20.31,*,VirtualNetwork,*,*,Allow,Outbound
+108,outbound-test2,outbound-test2,10.10.20.10,*,VirtualNetwork,*,*,Allow,Outbound
+102,outbound-test3,outbound-test3,10.10.20.11,*,VirtualNetwork,*,*,Allow,Outbound
+103,outbound-test4,outbound-test4,VirtualNetwork,*,VirtualNetwork,*,ICMP,Allow,Outbound
+104,outbound-test5,outbound-test5,10.10.50.0/24; 10.10.30.10/32; 10.10.20.50,*,10.10.20.30; 10.10.20.31,100-110,*,Allow,Outbound
+105,outbound-test6,outbound-test6,10.181.93.3; 10.181.93.4; 10.181.105.3; 10.171.231.4,*,10.181.93.90; 10.181.93.89,53-54; 60-61,UDP,Allow,Outbound
+106,outbound-test7,outbound-test7,172.16.21.111; 172.16.21.112; 172.16.21.113; 172.16.21.114; 172.16.21.152,*,10.181.93.90,53; 60,TCP,Allow,Outbound
+107,outbound-test8,outbound-test8,10.50.4.10; 10.50.4.11,*,10.181.93.90,53,UDP,Allow,Outbound
+109,outbound-test9,outbound-test9,172.16.21.247; 172.16.21.240; 172.16.21.245; 172.16.21.246,*,10.181.93.90; 10.181.93.89,*,*,Allow,Outbound
