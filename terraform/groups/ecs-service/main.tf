@@ -144,11 +144,10 @@ module "ecs-service-kafka-email-error" {
 
 
   # Service environment variable and secret configs
-  task_environment                 = local.task_environment
-  task_secrets                     = local.task_secrets
-  app_environment_filename_emails  = local.app_environment_filename_emails_kafka_error
-  app_environment_filename_letters = local.app_environment_filename_letters_kafka_error
-  use_set_environment_files        = local.use_set_environment_files
+  task_environment          = local.task_environment
+  task_secrets              = local.task_secrets
+  app_environment_filename  = local.app_env_emails_kafka_error
+  use_set_environment_files = local.use_set_environment_files
 
   # Eric variables
   use_eric_reverse_proxy    = true
@@ -214,7 +213,7 @@ module "ecs-service-kafka-letter-error" {
   # Service environment variable and secret configs
   task_environment          = local.task_environment
   task_secrets              = local.task_secrets
-  app_environment_filename  = local.app_environment_filename_kafka_error
+  app_environment_filename  = local.app_env_letters_kafka_error
   use_set_environment_files = local.use_set_environment_files
 
   # Eric variables

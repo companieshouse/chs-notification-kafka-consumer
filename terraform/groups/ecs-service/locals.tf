@@ -1,26 +1,26 @@
 # Define all hardcoded local variable and local variables looked up from data resources
 locals {
-  stack_name                                   = "notifications" # this must match the stack name the service deploys into
-  name_prefix                                  = "${local.stack_name}-${var.environment}"
-  global_prefix                                = "global-${var.environment}"
-  service_name                                 = "chs-notification-kafka-consumer"
-  container_port                               = "8080" # default Java port to match start script
-  docker_repo                                  = "chs-notification-kafka-consumer"
-  lb_listener_rule_priority                    = 25
-  lb_listener_paths                            = ["/notification-consumer/healthcheck"]
-  healthcheck_path                             = "/notification-consumer/healthcheck" #healthcheck path for chs-notification-kafka-consumer service
-  healthcheck_matcher                          = "200"
-  application_subnet_ids                       = data.aws_subnets.application.ids
-  kms_alias                                    = "alias/${var.aws_profile}/environment-services-kms"
-  service_secrets                              = jsondecode(data.vault_generic_secret.service_secrets.data_json)
-  stack_secrets                                = jsondecode(data.vault_generic_secret.stack_secrets.data_json)
-  application_subnet_pattern                   = local.stack_secrets["application_subnet_pattern"]
-  use_set_environment_files                    = var.use_set_environment_files
-  s3_config_bucket                             = data.vault_generic_secret.shared_s3.data["config_bucket_name"]
-  app_environment_filename                     = "chs-notification-kafka-consumer.env"
-  app_environment_filename_emails_kafka_error  = "chs-notification-kafka-email-error.env"
-  app_environment_filename_letters_kafka_error = "chs-notification-kafka-letter-error.env"
-  vpc_name                                     = local.stack_secrets["vpc_name"]
+  stack_name                  = "notifications" # this must match the stack name the service deploys into
+  name_prefix                 = "${local.stack_name}-${var.environment}"
+  global_prefix               = "global-${var.environment}"
+  service_name                = "chs-notification-kafka-consumer"
+  container_port              = "8080" # default Java port to match start script
+  docker_repo                 = "chs-notification-kafka-consumer"
+  lb_listener_rule_priority   = 25
+  lb_listener_paths           = ["/notification-consumer/healthcheck"]
+  healthcheck_path            = "/notification-consumer/healthcheck" #healthcheck path for chs-notification-kafka-consumer service
+  healthcheck_matcher         = "200"
+  application_subnet_ids      = data.aws_subnets.application.ids
+  kms_alias                   = "alias/${var.aws_profile}/environment-services-kms"
+  service_secrets             = jsondecode(data.vault_generic_secret.service_secrets.data_json)
+  stack_secrets               = jsondecode(data.vault_generic_secret.stack_secrets.data_json)
+  application_subnet_pattern  = local.stack_secrets["application_subnet_pattern"]
+  use_set_environment_files   = var.use_set_environment_files
+  s3_config_bucket            = data.vault_generic_secret.shared_s3.data["config_bucket_name"]
+  app_environment_filename    = "chs-notification-kafka-consumer.env"
+  app_env_emails_kafka_error  = "chs-notification-kafka-email-error.env"
+  app_env_letters_kafka_error = "chs-notification-kafka-letter-error.env"
+  vpc_name                    = local.stack_secrets["vpc_name"]
 
   # Enable Eric
   use_eric_reverse_proxy = true
