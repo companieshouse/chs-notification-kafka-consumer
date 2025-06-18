@@ -33,9 +33,9 @@ variable "desired_task_count" {
   default     = 1 # defaulted low for dev environments, override for production
 }
 variable "desired_task_count_kafka_error" {
-  type = number
+  type        = number
   description = "The desired ECS task count for this service"
-  default = 0 # defaulted low for dev environments, override for production
+  default     = 0 # defaulted low for dev environments, override for production
 }
 variable "required_cpus" {
   type        = number
@@ -143,13 +143,13 @@ variable "eventbridge_group_name" {
 variable "startup_eventbridge_scheduler_cron" {
   description = "Cron expression for the startup scheduler"
   type        = string
-  default     = "" 
+  default     = ""
 }
 
 variable "shutdown_eventbridge_scheduler_cron" {
   description = "Cron expression for shutdown scheduler"
   type        = string
-  default     = "" 
+  default     = ""
 }
 
 # ----------------------------------------------------------------------
