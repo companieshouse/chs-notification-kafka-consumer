@@ -32,6 +32,11 @@ variable "desired_task_count" {
   description = "The desired ECS task count for this service"
   default     = 1 # defaulted low for dev environments, override for production
 }
+variable "desired_task_count_kafka_error" {
+  type = number
+  description = "The desired ECS task count for this service"
+  default = 0 # defaulted low for dev environments, override for production
+}
 variable "required_cpus" {
   type        = number
   description = "The required cpu resource for this service. 1024 here is 1 vCPU"
@@ -88,6 +93,30 @@ variable "min_task_count" {
   type        = number
   description = "The minimum number of tasks for this service."
   default     = 1
+}
+
+variable "min_task_count_kafka_error" {
+  type        = number
+  description = "The minimum number of tasks for this service."
+  default     = 0
+}
+
+variable "max_task_count_kafka_error" {
+  type        = number
+  description = "The maximum number of tasks for this service."
+  default     = 1
+}
+
+variable "service_autoscale_scale_in_cooldown" {
+  type        = number
+  description = "Cooldown in seconds for ECS Service scale in (run fewer tasks)"
+  default     = 600
+}
+
+variable "service_autoscale_scale_out_cooldown" {
+  type        = number
+  description = "Cooldown in seconds for ECS Service scale out (add more tasks)"
+  default     = 600
 }
 
 # ------------------------------------------------------------------------------
@@ -156,6 +185,11 @@ variable "log_level" {
 variable "chs_notification_kafka_consumer_version" {
   type        = string
   description = "The version of the chs-notification-kafka-consumer container to run."
+}
+
+variable "kafka_error_consumer_version" {
+  type        = string
+  description = "The version of the kafka_error_consumer container to run."
 }
 
 # ------------------------------------------------------------------------------
