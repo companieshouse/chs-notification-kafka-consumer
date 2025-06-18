@@ -90,6 +90,39 @@ variable "min_task_count" {
   default     = 1
 }
 
+# ------------------------------------------------------------------------------
+# Scheduler variables
+# ------------------------------------------------------------------------------
+variable "enable_scale_down_eventbridge_scheduler" {
+  default     = false
+  description = "Whether to enable the scale down EventBridge scheduler for the ECS service"
+  type        = bool
+}
+
+variable "enable_scale_up_eventbridge_scheduler" {
+  default     = false
+  description = "Whether to enable the scale up EventBridge scheduler for the ECS service"
+  type        = bool
+}
+
+variable "eventbridge_group_name" {
+  default     = ""
+  description = "Group of the eventbridge schedulers"
+  type        = string
+}
+
+variable "startup_eventbridge_scheduler_cron" {
+  description = "Cron expression for the startup scheduler"
+  type        = string
+  default     = "" 
+}
+
+variable "shutdown_eventbridge_scheduler_cron" {
+  description = "Cron expression for shutdown scheduler"
+  type        = string
+  default     = "" 
+}
+
 # ----------------------------------------------------------------------
 # Cloudwatch alerts
 # ----------------------------------------------------------------------
