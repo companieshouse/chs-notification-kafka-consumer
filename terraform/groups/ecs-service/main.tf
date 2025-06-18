@@ -116,7 +116,7 @@ module "ecs-service-kafka-email-error" {
 
   # ECS Task container health check
   use_task_container_healthcheck = true
-  healthcheck_path               = local.healthcheck_path_kafka_error
+  healthcheck_path               = local.healthcheck_path_kafka_error_email
   healthcheck_matcher            = local.healthcheck_matcher
 
   # Docker container details
@@ -126,7 +126,7 @@ module "ecs-service-kafka-email-error" {
   container_port    = local.container_port
 
   # Service configuration
-  service_name                         = local.service_name_kafka_error
+  service_name                         = local.service_name_kafka_error_email
   name_prefix                          = local.name_prefix
   desired_task_count                   = var.desired_task_count_kafka_error
   min_task_count                       = var.min_task_count_kafka_error
@@ -183,7 +183,7 @@ module "ecs-service-kafka-letter-error" {
 
   # ECS Task container health check
   use_task_container_healthcheck = true
-  healthcheck_path               = local.healthcheck_path_kafka_error
+  healthcheck_path               = local.healthcheck_path_kafka_error_letter
   healthcheck_matcher            = local.healthcheck_matcher
 
   # Docker container details
@@ -193,7 +193,7 @@ module "ecs-service-kafka-letter-error" {
   container_port    = local.container_port
 
   # Service configuration
-  service_name                         = local.service_name_kafka_error
+  service_name                         = local.service_name_kafka_error_letter
   name_prefix                          = local.name_prefix
   desired_task_count                   = var.desired_task_count_kafka_error
   min_task_count                       = var.min_task_count_kafka_error

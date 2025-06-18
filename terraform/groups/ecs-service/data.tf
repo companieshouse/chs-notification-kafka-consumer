@@ -69,5 +69,5 @@ data "vault_generic_secret" "shared_s3" {
 }
 
 data "aws_iam_role" "eventbridge_role" {
-   name = "${local.name_prefix}-eventbridge-scheduler-role"
+  name = "${local.name_prefix}-eventbridge-scheduler-role"
 }
