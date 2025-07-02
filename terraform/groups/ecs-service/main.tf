@@ -41,10 +41,6 @@ module "ecs-service" {
   batch_service                         = true
 
   # Scheduler configuration
-<<<<<<< HEAD
-    
-=======
->>>>>>> b55fc0e (removing eventbridge scaling)
   eventbridge_group_name                  = local.name_prefix
   startup_eventbridge_scheduler_cron      = var.startup_eventbridge_scheduler_cron
   shutdown_eventbridge_scheduler_cron     = var.shutdown_eventbridge_scheduler_cron
