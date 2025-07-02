@@ -42,13 +42,13 @@ module "ecs-service" {
 
   # Scheduler configuration
 <<<<<<< HEAD
-  
+    
 =======
 >>>>>>> b55fc0e (removing eventbridge scaling)
   eventbridge_group_name                  = local.name_prefix
   startup_eventbridge_scheduler_cron      = var.startup_eventbridge_scheduler_cron
   shutdown_eventbridge_scheduler_cron     = var.shutdown_eventbridge_scheduler_cron
-  
+
   # Load balancer configuration
   lb_listener_arn                   = data.aws_lb_listener.service_lb_listener.arn
   lb_listener_rule_priority         = local.lb_listener_rule_priority
