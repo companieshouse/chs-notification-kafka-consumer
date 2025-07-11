@@ -19,7 +19,7 @@ terraform {
 }
 
 module "secrets" {
-  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/secrets?ref=1.0.311"
+  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/secrets?ref=1.0.333"
 
   name_prefix = "${local.service_name}-${var.environment}"
   environment = var.environment
@@ -28,7 +28,7 @@ module "secrets" {
 }
 
 module "ecs-service" {
-  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.311"
+  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.333"
 
   # Environmental configuration
   environment             = var.environment
@@ -37,6 +37,13 @@ module "ecs-service" {
   vpc_id                  = data.aws_vpc.vpc.id
   ecs_cluster_id          = data.aws_ecs_cluster.ecs_cluster.id
   task_execution_role_arn = data.aws_iam_role.ecs_cluster_iam_role.arn
+  eventbridge_scheduler_role_arn        = data.aws_iam_role.eventbridge_role.arn  
+  batch_service                         = true
+
+  # Scheduler configuration
+  eventbridge_group_name                  = local.name_prefix
+  startup_eventbridge_scheduler_cron      = var.startup_eventbridge_scheduler_cron
+  shutdown_eventbridge_scheduler_cron     = var.shutdown_eventbridge_scheduler_cron
 
   # Load balancer configuration
   lb_listener_arn                   = data.aws_lb_listener.service_lb_listener.arn
@@ -108,15 +115,13 @@ module "ecs-service-kafka-email-error" {
   batch_service                  = true
 
   # Scheduler configuration
-  enable_scale_up_eventbridge_scheduler   = var.enable_scale_up_eventbridge_scheduler
-  enable_scale_down_eventbridge_scheduler = var.enable_scale_down_eventbridge_scheduler
   eventbridge_group_name                  = local.name_prefix
   startup_eventbridge_scheduler_cron      = var.startup_eventbridge_scheduler_cron
   shutdown_eventbridge_scheduler_cron     = var.shutdown_eventbridge_scheduler_cron
 
   # ECS Task container health check
   use_task_container_healthcheck = true
-  healthcheck_path               = local.healthcheck_path_kafka_error
+  healthcheck_path               = local.healthcheck_path_kafka_error_email
   healthcheck_matcher            = local.healthcheck_matcher
 
   # Docker container details
@@ -126,7 +131,7 @@ module "ecs-service-kafka-email-error" {
   container_port    = local.container_port
 
   # Service configuration
-  service_name                         = local.service_name_kafka_error
+  service_name                         = local.service_name_kafka_error_email
   name_prefix                          = local.name_prefix
   desired_task_count                   = var.desired_task_count_kafka_error
   min_task_count                       = var.min_task_count_kafka_error
@@ -175,15 +180,13 @@ module "ecs-service-kafka-letter-error" {
   batch_service                  = true
 
   # Scheduler configuration
-  enable_scale_up_eventbridge_scheduler   = var.enable_scale_up_eventbridge_scheduler
-  enable_scale_down_eventbridge_scheduler = var.enable_scale_down_eventbridge_scheduler
   eventbridge_group_name                  = local.name_prefix
   startup_eventbridge_scheduler_cron      = var.startup_eventbridge_scheduler_cron
   shutdown_eventbridge_scheduler_cron     = var.shutdown_eventbridge_scheduler_cron
 
   # ECS Task container health check
   use_task_container_healthcheck = true
-  healthcheck_path               = local.healthcheck_path_kafka_error
+  healthcheck_path               = local.healthcheck_path_kafka_error_letter
   healthcheck_matcher            = local.healthcheck_matcher
 
   # Docker container details
@@ -193,7 +196,7 @@ module "ecs-service-kafka-letter-error" {
   container_port    = local.container_port
 
   # Service configuration
-  service_name                         = local.service_name_kafka_error
+  service_name                         = local.service_name_kafka_error_letter
   name_prefix                          = local.name_prefix
   desired_task_count                   = var.desired_task_count_kafka_error
   min_task_count                       = var.min_task_count_kafka_error

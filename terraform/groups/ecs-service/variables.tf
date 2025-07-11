@@ -33,9 +33,9 @@ variable "desired_task_count" {
   default     = 1 # defaulted low for dev environments, override for production
 }
 variable "desired_task_count_kafka_error" {
-  type = number
+  type        = number
   description = "The desired ECS task count for this service"
-  default = 0 # defaulted low for dev environments, override for production
+  default     = 0 # defaulted low for dev environments, override for production
 }
 variable "required_cpus" {
   type        = number
@@ -119,20 +119,22 @@ variable "service_autoscale_scale_out_cooldown" {
   default     = 600
 }
 
-# ------------------------------------------------------------------------------
-# Scheduler variables
-# ------------------------------------------------------------------------------
-variable "enable_scale_down_eventbridge_scheduler" {
-  default     = false
-  description = "Whether to enable the scale down EventBridge scheduler for the ECS service"
+variable "create_eventbridge_scheduler_group" {
+  default     = true
+  description = "Whether to create the ECS EventBridge scheduler group"
   type        = bool
 }
 
-variable "enable_scale_up_eventbridge_scheduler" {
-  default     = false
-  description = "Whether to enable the scale up EventBridge scheduler for the ECS service"
+variable "create_eventbridge_scheduler_role" {
+  default     = true
+  description = "Whether to enable eventbridge scheduler iam role in ecs cluster."
   type        = bool
 }
+
+# ------------------------------------------------------------------------------
+# Scheduler variables
+# ------------------------------------------------------------------------------
+
 
 variable "eventbridge_group_name" {
   default     = ""
@@ -143,13 +145,13 @@ variable "eventbridge_group_name" {
 variable "startup_eventbridge_scheduler_cron" {
   description = "Cron expression for the startup scheduler"
   type        = string
-  default     = "" 
+  default     = ""
 }
 
 variable "shutdown_eventbridge_scheduler_cron" {
   description = "Cron expression for shutdown scheduler"
   type        = string
-  default     = "" 
+  default     = ""
 }
 
 # ----------------------------------------------------------------------
