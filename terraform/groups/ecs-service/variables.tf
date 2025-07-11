@@ -119,6 +119,18 @@ variable "service_autoscale_scale_out_cooldown" {
   default     = 600
 }
 
+variable "create_eventbridge_scheduler_group" {
+  default     = true
+  description = "Whether to create the ECS EventBridge scheduler group"
+  type        = bool
+}
+
+variable "create_eventbridge_scheduler_role" {
+  default     = true
+  description = "Whether to enable eventbridge scheduler iam role in ecs cluster."
+  type        = bool
+}
+
 # ------------------------------------------------------------------------------
 # Scheduler variables
 # ------------------------------------------------------------------------------
