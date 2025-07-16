@@ -96,5 +96,3 @@ chs-notification-kafka-consumer/
 │── ...                     # Other files/folders
 └── README.md               # This file
 ```
-
-
