@@ -38,7 +38,6 @@ module "ecs-service" {
   ecs_cluster_id          = data.aws_ecs_cluster.ecs_cluster.id
   task_execution_role_arn = data.aws_iam_role.ecs_cluster_iam_role.arn
   eventbridge_scheduler_role_arn        = data.aws_iam_role.eventbridge_role.arn  
-  batch_service                         = true
 
   # Scheduler configuration
   eventbridge_group_name                  = local.name_prefix
@@ -112,7 +111,6 @@ module "ecs-service-kafka-email-error" {
   ecs_cluster_arn                = data.aws_ecs_cluster.ecs_cluster.arn
   task_execution_role_arn        = data.aws_iam_role.ecs_cluster_iam_role.arn
   eventbridge_scheduler_role_arn = data.aws_iam_role.eventbridge_role.arn
-  batch_service                  = true
 
   # Scheduler configuration
   eventbridge_group_name                  = local.name_prefix
@@ -177,7 +175,6 @@ module "ecs-service-kafka-letter-error" {
   ecs_cluster_arn                = data.aws_ecs_cluster.ecs_cluster.arn
   task_execution_role_arn        = data.aws_iam_role.ecs_cluster_iam_role.arn
   eventbridge_scheduler_role_arn = data.aws_iam_role.eventbridge_role.arn
-  batch_service                  = true
 
   # Scheduler configuration
   eventbridge_group_name                  = local.name_prefix
