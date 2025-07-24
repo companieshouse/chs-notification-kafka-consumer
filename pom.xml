@@ -42,6 +42,8 @@
         <kafka-models.version>3.0.17</kafka-models.version>
         <!-- CVE-2025-48734 -->
         <commons-beanutils.version>1.11.0</commons-beanutils.version>
+        <!-- CVE-2025-48976 -->
+        <commons-fileupload.version>1.6.0</commons-fileupload.version>
         <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
         <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
         <sonar.login></sonar.login>
@@ -253,6 +255,11 @@
             <groupId>commons-beanutils</groupId>
             <artifactId>commons-beanutils</artifactId>
             <version>${commons-beanutils.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>${commons-fileupload.version}</version>
         </dependency>
     </dependencies>
 
