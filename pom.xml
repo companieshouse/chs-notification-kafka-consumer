@@ -55,6 +55,8 @@
         <spring-security-core.version>6.5.1</spring-security-core.version>
         <!-- CVE-2025-41234 -->
         <spring-web.version>6.2.8</spring-web.version>
+        <!-- CVE-2025-49124, CVE-2025-49125, CVE-2025-46701, CVE-2025-48988 -->
+        <tomcat-embed.version>10.1.43</tomcat-embed.version>
         <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
         <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
         <sonar.login></sonar.login>
@@ -291,6 +293,16 @@
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-core</artifactId>
             <version>${spring-security-core.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-core</artifactId>
+            <version>${tomcat-embed.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.tomcat.embed</groupId>
+            <artifactId>tomcat-embed-websocket</artifactId>
+            <version>${tomcat-embed.version}</version>
         </dependency>
     </dependencies>
 
