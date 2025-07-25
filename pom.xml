@@ -44,6 +44,8 @@
         <commons-beanutils.version>1.11.0</commons-beanutils.version>
         <!-- CVE-2025-48976 -->
         <commons-fileupload.version>1.6.0</commons-fileupload.version>
+        <!-- CVE-2025-48924 -->
+        <commons-lang3.version>3.18.0</commons-lang3.version>
         <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
         <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
         <sonar.login></sonar.login>
@@ -260,6 +262,11 @@
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
             <version>${commons-fileupload.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
         </dependency>
     </dependencies>
 
