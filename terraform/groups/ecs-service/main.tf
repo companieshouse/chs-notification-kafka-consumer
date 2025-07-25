@@ -159,15 +159,6 @@ module "ecs-service-kafka-email-error" {
   app_environment_filename  = local.app_env_emails_kafka_error
   use_set_environment_files = local.use_set_environment_files
 
-  # Eric variables
-  use_eric_reverse_proxy    = true
-  eric_port                 = local.eric_port
-  eric_environment_filename = local.eric_environment_filename
-  eric_secrets              = local.eric_secrets
-  eric_version              = var.eric_version
-  eric_cpus                 = var.eric_cpus
-  eric_memory               = var.eric_memory
-
 }
 
 module "ecs-service-kafka-letter-error" {
@@ -229,14 +220,5 @@ module "ecs-service-kafka-letter-error" {
   task_secrets              = local.task_secrets
   app_environment_filename  = local.app_env_letters_kafka_error
   use_set_environment_files = local.use_set_environment_files
-
-  # Eric variables
-  use_eric_reverse_proxy    = true
-  eric_port                 = local.eric_port
-  eric_environment_filename = local.eric_environment_filename
-  eric_secrets              = local.eric_secrets
-  eric_version              = var.eric_version
-  eric_cpus                 = var.eric_cpus
-  eric_memory               = var.eric_memory
 
 }
