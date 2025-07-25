@@ -34,7 +34,8 @@
         <api-helper-java.version>3.0.1</api-helper-java.version>
         <flapdoodle.version>4.16.1</flapdoodle.version>
         <email-producer-java.version>3.0.3</email-producer-java.version>
-        <kafka-clients.version>3.9.0</kafka-clients.version>
+        <!-- CVE-2025-27817, CVE-2025-27818-->
+        <kafka-clients.version>3.9.1</kafka-clients.version>
         <logback-classic.version>1.5.17</logback-classic.version>
         <junit-jupiter-engine-version>5.11.4</junit-jupiter-engine-version>
         <mockito-junit-jupiter-version>5.15.2</mockito-junit-jupiter-version>
