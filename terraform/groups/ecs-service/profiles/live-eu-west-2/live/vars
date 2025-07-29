@@ -14,4 +14,10 @@ desired_task_count=2
 max_task_count=2
 min_task_count=2
 
+# Scheduler configuration (for kafka error consumer)
+enable_scale_up_eventbridge_scheduler     = true
+enable_scale_down_eventbridge_scheduler   = true
+startup_eventbridge_scheduler_cron        = "cron(15 00 ? * MON-FRI)"
+shutdown_eventbridge_scheduler_cron       = "cron(45 00 ? * MON-FRI)"
+
 
