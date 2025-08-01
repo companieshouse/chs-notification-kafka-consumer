@@ -116,9 +116,9 @@ module "ecs-service-kafka-email-error" {
   # Scheduler configuration
   enable_scale_up_eventbridge_scheduler   = var.enable_scale_up_eventbridge_scheduler
   enable_scale_down_eventbridge_scheduler = var.enable_scale_down_eventbridge_scheduler
-  eventbridge_group_name              = local.name_prefix
-  startup_eventbridge_scheduler_cron  = var.startup_eventbridge_scheduler_cron
-  shutdown_eventbridge_scheduler_cron = var.shutdown_eventbridge_scheduler_cron
+  eventbridge_group_name                  = local.name_prefix
+  startup_eventbridge_scheduler_cron      = var.startup_eventbridge_scheduler_cron
+  shutdown_eventbridge_scheduler_cron     = var.shutdown_eventbridge_scheduler_cron
 
   # ECS Task container health check
   use_task_container_healthcheck = true
@@ -174,9 +174,9 @@ module "ecs-service-kafka-letter-error" {
   # Scheduler configuration
   enable_scale_up_eventbridge_scheduler   = var.enable_scale_up_eventbridge_scheduler
   enable_scale_down_eventbridge_scheduler = var.enable_scale_down_eventbridge_scheduler
-  eventbridge_group_name              = local.name_prefix
-  startup_eventbridge_scheduler_cron  = var.startup_eventbridge_scheduler_cron
-  shutdown_eventbridge_scheduler_cron = var.shutdown_eventbridge_scheduler_cron
+  eventbridge_group_name                  = local.name_prefix
+  startup_eventbridge_scheduler_cron      = var.startup_eventbridge_scheduler_cron
+  shutdown_eventbridge_scheduler_cron     = var.shutdown_eventbridge_scheduler_cron
 
   # ECS Task container health check
   use_task_container_healthcheck = true

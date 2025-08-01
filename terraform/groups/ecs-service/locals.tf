@@ -4,6 +4,8 @@ locals {
   name_prefix                         = "${local.stack_name}-${var.environment}"
   global_prefix                       = "global-${var.environment}"
   service_name                        = "chs-notification-kafka-consumer"
+  service_name_kafka_error_email      = "chs-notification-kafka-email-error"
+  service_name_kafka_error_letter     = "chs-notification-kafka-letter-error"
   container_port                      = "8080" # default Java port to match start script
   docker_repo                         = "chs-notification-kafka-consumer"
   lb_listener_rule_priority           = 25
@@ -21,8 +23,6 @@ locals {
   app_env_emails_kafka_error          = "chs-notification-kafka-email-error.env"
   app_env_letters_kafka_error         = "chs-notification-kafka-letter-error.env"
   vpc_name                            = local.stack_secrets["vpc_name"]
-  service_name_kafka_error_email      = "chs-notification-kafka-email-error"
-  service_name_kafka_error_letter     = "chs-notification-kafka-letter-error"
   healthcheck_path_kafka_error_email  = "/kafka-error-consumer/healthcheck" # healthcheck path for chs-notification-kafka-email-error"
   healthcheck_path_kafka_error_letter = "/kafka-error-consumer/healthcheck" # healthcheck path for chs-notification-kafka-letter-error"
   docker_repo_kafka_error             = "kafka-error-consumer"
