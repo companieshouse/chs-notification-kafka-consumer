@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.chs.notification.kafka.consumer.kafkaintegration;
 
 import consumer.exception.NonRetryableErrorException;
+import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
@@ -14,6 +15,7 @@ import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.Noti
 import uk.gov.companieshouse.chs.notification.kafka.consumer.translator.MessageMapper;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
+import uk.gov.companieshouse.logging.util.DataMap;
 import uk.gov.companieshouse.notification.ChsEmailNotification;
 import uk.gov.companieshouse.notification.ChsLetterNotification;
 
@@ -55,15 +57,29 @@ class KafkaConsumerService {
             groupId = "${kafka.group-id.email}",
             containerFactory = "listenerContainerFactoryEmail"
     )
-    public void consumeEmailMessage(ConsumerRecord<String, ChsEmailNotification> consumerRecord, Acknowledgment acknowledgment) {
+    public void consumeEmailMessage(ConsumerRecord<String, ChsEmailNotification> consumerRecord,
+            Acknowledgment acknowledgment) {
         LOG.debug("Consuming email record: " + consumerRecord);
         var emailNotification = consumerRecord.value();
-        LOG.info("Consuming email record with sender reference: " + emailNotification.getSenderDetails().getReference());
+        LOG.info("Consuming email record with sender reference: "
+                + emailNotification.getSenderDetails().getReference());
         final var emailRequest = messageMapper.mapToEmailDetailsRequest(emailNotification);
         notifyIntegrationService.sendEmailMessageToIntegrationApi(emailRequest)
                 .doOnSuccess(v -> acknowledgment.acknowledge())
                 .onErrorResume(e -> {
-                    LOG.error("Failed to send email request to integration API: " + e.getMessage());
+                var logMap = new DataMap.Builder()
+                        .topic(consumerRecord.topic())
+                        .partition(consumerRecord.partition())
+                        .offset(consumerRecord.offset())
+                        .kafkaMessage(emailNotification.toString())
+                        .errorMessage(e.getMessage())
+                        .build()
+                        .getLogMap();
+
+                    LOG.error("Failed to send email request to integration API",
+                            new Exception(e),
+                            logMap
+                    );
                     return Mono.error(e);
                 })
                 .block();
@@ -89,15 +105,28 @@ class KafkaConsumerService {
             groupId = "${kafka.group-id.letter}",
             containerFactory = "listenerContainerFactoryLetter"
     )
-    public void consumeLetterMessage(ConsumerRecord<String, ChsLetterNotification> consumerRecord, Acknowledgment acknowledgment) {
+    public void consumeLetterMessage(ConsumerRecord<String, ChsLetterNotification> consumerRecord,
+            Acknowledgment acknowledgment) {
         LOG.debug("Consuming letter record: " + consumerRecord);
         var letterNotification = consumerRecord.value();
-        LOG.info("Consuming letter record with sender reference: " + letterNotification.getSenderDetails().getReference());
+        LOG.info("Consuming letter record with sender reference: "
+                + letterNotification.getSenderDetails().getReference());
         final var letterRequest = messageMapper.mapToLetterDetailsRequest(letterNotification);
         notifyIntegrationService.sendLetterMessageToIntegrationApi(letterRequest)
                 .doOnSuccess(v -> acknowledgment.acknowledge())
                 .onErrorResume(e -> {
-                    LOG.error("Failed to send letter request to integration API: " + e.getMessage());
+                    Map<String, Object> logMap = new DataMap.Builder()
+                            .topic(consumerRecord.topic())
+                            .partition(consumerRecord.partition())
+                            .offset(consumerRecord.offset())
+                            .kafkaMessage(letterNotification.toString())
+                            .errorMessage(e.getMessage())
+                            .build()
+                            .getLogMap();
+                    LOG.error("Failed to send letter request to integration API",
+                            new Exception(e),
+                            logMap
+                    );
                     return Mono.error(e);
                 })
                 .block();
