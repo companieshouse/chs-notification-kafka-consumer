@@ -32,10 +32,6 @@ public class OutputAssertions {
                     "No log entries found for event: '" + event + "' with a 'data.message' field.");
         }
 
-        System.out.println();
-        System.out.println("--------------------------");
-        System.out.println(matchingEventEntries);
-
         return matchingEventEntries.stream()
                 .filter(e -> message.equals(e.get("message").asText()))
                 .findFirst()

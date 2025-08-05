@@ -62,7 +62,7 @@ class ApiIntegrationInterfaceTest {
     }
 
     @Test
-    void When_ErrorIsThrown_Expect_ErrorLogMessage() throws IOException {
+    void When_ErrorIsThrown_In_consumeEmailMessage_Expect_ErrorLogMessage() throws IOException {
         WebClient client = WebClient.builder()
                 .exchangeFunction(request -> Mono.error(
                         WebClientResponseException.create(
@@ -89,6 +89,33 @@ class ApiIntegrationInterfaceTest {
     }
 
     @Test
+    void When_ErrorIsThrown_In_consumeLetterMessage_Expect_ErrorLogMessage() throws IOException {
+        WebClient client = WebClient.builder()
+                .exchangeFunction(request -> Mono.error(
+                        WebClientResponseException.create(
+                                500, "Internal Service Error", null,
+                                "Body Text".getBytes(StandardCharsets.UTF_8), null
+                        )))
+                .build();
+
+        NotifyIntegrationService service = new NotifyIntegrationService(client);
+
+        try (var outputCapture = new OutputCapture()) {
+            service.sendLetterMessageToIntegrationApi(new GovUkLetterDetailsRequest())
+                    .onErrorResume(e -> Mono.empty()) // absorb error for test
+                    .block(); // trigger the call
+
+            var amountOfErrorLogs = outputCapture.findAmountByEvent("error");
+            assertEquals(1, amountOfErrorLogs,
+                    "Should show an error log for the failed API call");
+
+            var errorLog = getDataFromLogMessage(outputCapture, "error", "Letter API call failed");
+            assertJsonHasAndEquals(errorLog, "uri", "/letter");
+            assertJsonHasAndEquals(errorLog, "status", "500");
+        }
+    }
+
+    @Test
     void When_ValidEmailRequest_Expect_SuccessfulCall() throws IOException {
         ExchangeFunction exchangeFunction = clientRequest -> Mono.just(
                 ClientResponse.create(HttpStatus.NO_CONTENT)
@@ -102,13 +129,38 @@ class ApiIntegrationInterfaceTest {
         try (var outputCapture = new OutputCapture()) {
             NotifyIntegrationService service = new NotifyIntegrationService(client);
 
-            var amountOfErrorLogs = outputCapture.findAmountByEvent("error");
-            assertEquals(0, amountOfErrorLogs,
-                    "Should not log an error for a successful response");
-
             assertDoesNotThrow(() ->
                     service.sendEmailMessageToIntegrationApi(new GovUkEmailDetailsRequest())
                             .block());
+
+            var amountOfErrorLogs = outputCapture.findAmountByEvent("error");
+            assertEquals(0, amountOfErrorLogs,
+                    "Should not log an error for a successful response");
+        }
+
+    }
+
+    @Test
+    void When_ValidLetterRequest_Expect_SuccessfulCall() throws IOException {
+        ExchangeFunction exchangeFunction = clientRequest -> Mono.just(
+                ClientResponse.create(HttpStatus.NO_CONTENT)
+                        .body("")
+                        .build());
+
+        WebClient client = WebClient.builder()
+                .exchangeFunction(exchangeFunction)
+                .build();
+
+        try (var outputCapture = new OutputCapture()) {
+            NotifyIntegrationService service = new NotifyIntegrationService(client);
+
+            assertDoesNotThrow(() ->
+                    service.sendLetterMessageToIntegrationApi(new GovUkLetterDetailsRequest())
+                            .block());
+
+            var amountOfErrorLogs = outputCapture.findAmountByEvent("error");
+            assertEquals(0, amountOfErrorLogs,
+                    "Should not log an error for a successful response");
         }
 
     }
