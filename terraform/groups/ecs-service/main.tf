@@ -66,6 +66,8 @@ module "ecs-service" {
   required_memory                    = var.required_memory
   service_autoscale_enabled          = var.service_autoscale_enabled
   service_autoscale_target_value_cpu = var.service_autoscale_target_value_cpu
+  service_autoscale_scale_in_cooldown  = var.service_autoscale_scale_in_cooldown
+  service_autoscale_scale_out_cooldown = var.service_autoscale_scale_out_cooldown
   service_scaledown_schedule         = var.service_scaledown_schedule
   service_scaleup_schedule           = var.service_scaleup_schedule
   use_fargate                        = var.use_fargate
