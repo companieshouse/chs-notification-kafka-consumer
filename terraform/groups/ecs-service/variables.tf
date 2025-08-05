@@ -184,7 +184,7 @@ variable "ssm_version_prefix" {
 
 variable "use_set_environment_files" {
   type        = bool
-  default     = true
+  default     = false
   description = "Toggle default global and shared  environment files"
 }
 
