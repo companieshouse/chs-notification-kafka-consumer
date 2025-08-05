@@ -25,6 +25,7 @@ public class OutputCapture implements AutoCloseable {
         this.teeOut = new TeeOutputStream(originalOut, outBuffer);
         this.capturedStream = new PrintStream(teeOut, true, StandardCharsets.UTF_8);
         System.setOut(this.capturedStream);
+        System.out.flush();
     }
 
     /**
