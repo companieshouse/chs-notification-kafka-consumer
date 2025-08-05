@@ -13,5 +13,5 @@ service_scaleup_schedule   = "5 6 * * ? *"
 # Scheduler configuration (for kafka error consumer)
 enable_scale_up_eventbridge_scheduler     = true
 enable_scale_down_eventbridge_scheduler   = true
-startup_eventbridge_scheduler_cron        = "cron(20 17 ? * MON-FRI)"
-shutdown_eventbridge_scheduler_cron       = "cron(30 17 ? * MON-FRI)"
+startup_eventbridge_scheduler_cron        = "cron(15 10 ? * MON-FRI)"
+shutdown_eventbridge_scheduler_cron       = "cron(45 10 ? * MON-FRI)"

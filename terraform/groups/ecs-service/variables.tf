@@ -221,3 +221,4 @@ variable "eric_version" {
   type        = string
   description = "The version of the eric container to run."
 }
+
