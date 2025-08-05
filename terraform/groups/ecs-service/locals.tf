@@ -74,7 +74,9 @@ locals {
   # TODO: task_secrets don't seem to correspond with 'parameter_store_secrets'. What is the difference?
   task_secrets = concat(local.global_secret_list, local.service_secret_list)
 
-  task_environment = concat(local.ssm_global_version_map, local.ssm_service_version_map)
+  task_environment = concat(local.ssm_global_version_map, local.ssm_service_version_map, [
+    { name : "PORT", value : local.container_port }
+  ])
 
   # get eric secrets from global secrets map
   eric_secrets = [
