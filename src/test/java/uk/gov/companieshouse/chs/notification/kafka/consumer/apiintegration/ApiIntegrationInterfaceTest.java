@@ -4,7 +4,6 @@ import helpers.OutputCapture;
 import jakarta.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Objects;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +16,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono;
 import uk.gov.companieshouse.api.chs.notification.model.GovUkEmailDetailsRequest;
 import uk.gov.companieshouse.api.chs.notification.model.GovUkLetterDetailsRequest;
-import uk.gov.companieshouse.logging.util.DataMap;
 
 import static helpers.utils.OutputAssertions.assertJsonHasAndEquals;
 import static helpers.utils.OutputAssertions.getDataFromLog;
