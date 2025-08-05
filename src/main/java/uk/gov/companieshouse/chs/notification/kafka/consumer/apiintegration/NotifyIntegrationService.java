@@ -39,7 +39,7 @@ public class NotifyIntegrationService {
                 .doOnError(WebClientResponseException.class, err -> {
                     var logMap = new DataMap.Builder()
                             .uri("/email")
-                            .message(err.getMessage())
+                            .errorMessage(err.getMessage())
                             .status(Objects.toString(err.getStatusCode().value()))
                             .build().getLogMap();
                     LOG.error("Email API call failed", new Exception(err), logMap);

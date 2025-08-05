@@ -4,6 +4,7 @@ import helpers.OutputCapture;
 import jakarta.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +17,10 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono;
 import uk.gov.companieshouse.api.chs.notification.model.GovUkEmailDetailsRequest;
 import uk.gov.companieshouse.api.chs.notification.model.GovUkLetterDetailsRequest;
+import uk.gov.companieshouse.logging.util.DataMap;
 
+import static helpers.utils.OutputAssertions.assertJsonHasAndEquals;
+import static helpers.utils.OutputAssertions.getDataFromLog;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
@@ -60,12 +64,11 @@ class ApiIntegrationInterfaceTest {
     }
 
     @Test
-    void When_WebClientReturns500_Expect_DoOnErrorToTrigger() throws IOException {
-        // Set up WebClient with an ExchangeFunction that always throws a 500 error
+    void When_ErrorIsThrown_Expect_ErrorLogMessage() throws IOException {
         WebClient client = WebClient.builder()
                 .exchangeFunction(request -> Mono.error(
                         WebClientResponseException.create(
-                                200, "Success", null,
+                                500, "Internal Service Error", null,
                                 "Body Text".getBytes(StandardCharsets.UTF_8), null
                         )))
                 .build();
@@ -78,8 +81,13 @@ class ApiIntegrationInterfaceTest {
                     .block(); // trigger the call
 
             var amountOfErrorLogs = outputCapture.findAmountByEvent("error");
-            assertEquals(0, amountOfErrorLogs,
-                    "Should not log an error for a successful response");
+            assertEquals(1, amountOfErrorLogs,
+                    "Should show an error log for the failed API call");
+
+            var errorLog = getDataFromLog(outputCapture, "error", 0);
+            assertJsonHasAndEquals(errorLog, "uri", "/email");
+            assertJsonHasAndEquals(errorLog, "message", "Email API call failed");
+            assertJsonHasAndEquals(errorLog, "status", "500");
         }
     }
 
