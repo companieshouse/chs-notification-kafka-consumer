@@ -75,8 +75,8 @@ class ApiIntegrationInterfaceTest {
 
         try (var outputCapture = new OutputCapture()) {
             service.sendEmailMessageToIntegrationApi(new GovUkEmailDetailsRequest())
-                    .onErrorResume(e -> Mono.empty()) // absorb error for test
-                    .block(); // trigger the call
+                    .onErrorResume(e -> Mono.empty())
+                    .block();
 
             var amountOfErrorLogs = outputCapture.findAmountByEvent("error");
             assertEquals(1, amountOfErrorLogs,
@@ -102,8 +102,8 @@ class ApiIntegrationInterfaceTest {
 
         try (var outputCapture = new OutputCapture()) {
             service.sendLetterMessageToIntegrationApi(new GovUkLetterDetailsRequest())
-                    .onErrorResume(e -> Mono.empty()) // absorb error for test
-                    .block(); // trigger the call
+                    .onErrorResume(e -> Mono.empty())
+                    .block();
 
             var amountOfErrorLogs = outputCapture.findAmountByEvent("error");
             assertEquals(1, amountOfErrorLogs,

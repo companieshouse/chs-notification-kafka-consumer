@@ -59,6 +59,10 @@ class KafkaConsumerServiceTest {
     private ConsumerRecord<String, ChsEmailNotification> emailRecord;
     private ConsumerRecord<String, ChsLetterNotification> letterRecord;
 
+    private static final String ERROR = org.slf4j.event.Level.ERROR.toString().toLowerCase();
+    private static final String DEBUG = org.slf4j.event.Level.DEBUG.toString().toLowerCase();
+    private static final String INFO = org.slf4j.event.Level.INFO.toString().toLowerCase();
+
     @BeforeEach
     void setUp() {
         mockEmailNotification = new ChsEmailNotification();
@@ -90,15 +94,13 @@ class KafkaConsumerServiceTest {
             // When
             kafkaConsumerService.consumeEmailMessage(emailRecord, acknowledgment);
 
-            // Debug Log Message
-            var debugData = getDataFromLogMessage(outputCapture, "debug",
+            var debugData = getDataFromLogMessage(outputCapture, DEBUG,
                     "Consuming email record: " + emailRecord);
-            assertCommonFields(debugData, EMAIL_TOPIC, mockEmailNotification.toString());
+            assertEmailCommonFields(debugData);
 
-            // Info Log Message
-            var infoData = getDataFromLogMessage(outputCapture, "info",
+            var infoData = getDataFromLogMessage(outputCapture, INFO,
                     "Consuming email record with sender reference: email-ref-123");
-            assertCommonFields(infoData, EMAIL_TOPIC, mockEmailNotification.toString());
+            assertEmailCommonFields(infoData);
 
         }
 
@@ -120,15 +122,13 @@ class KafkaConsumerServiceTest {
             // When
             kafkaConsumerService.consumeLetterMessage(letterRecord, acknowledgment);
 
-            // Debug Log Message
-            var debugData = getDataFromLogMessage(outputCapture, "debug",
+            var debugData = getDataFromLogMessage(outputCapture, DEBUG,
                     "Consuming letter record: " + letterRecord);
-            assertCommonFields(debugData, LETTER_TOPIC, mockLetterNotification.toString());
+            assertLetterCommonFields(debugData);
 
-            // Info Log Message
-            var infoData = getDataFromLogMessage(outputCapture, "info",
+            var infoData = getDataFromLogMessage(outputCapture, INFO,
                     "Consuming letter record with sender reference: letter-ref-456");
-            assertCommonFields(infoData, LETTER_TOPIC, mockLetterNotification.toString());
+            assertLetterCommonFields(infoData);
 
         }
 
@@ -151,15 +151,15 @@ class KafkaConsumerServiceTest {
             assertThrows(RuntimeException.class,
                     () -> kafkaConsumerService.consumeEmailMessage(emailRecord, acknowledgment));
 
-            // Debug Log Message
-            var debugData = getDataFromLogMessage(outputCapture, "debug", "Consuming email record: " + emailRecord);
-            assertCommonFields(debugData, EMAIL_TOPIC, mockEmailNotification.toString());
+            var debugData = getDataFromLogMessage(outputCapture, DEBUG,
+                    "Consuming email record: " + emailRecord);
+            assertEmailCommonFields(debugData);
 
-            // Info Log Message
-            var infoData = getDataFromLogMessage(outputCapture, "info", "Consuming email record with sender reference: email-ref-123");
-            assertCommonFields(infoData, EMAIL_TOPIC, mockEmailNotification.toString());
+            var infoData = getDataFromLogMessage(outputCapture, INFO,
+                    "Consuming email record with sender reference: email-ref-123");
+            assertEmailCommonFields(infoData);
 
-            assertEquals(0, outputCapture.findAmountByEvent("error"),
+            assertEquals(0, outputCapture.findAmountByEvent(ERROR),
                     "No error logs should be generated for mapping failure");
 
         }
@@ -183,13 +183,13 @@ class KafkaConsumerServiceTest {
             assertThrows(RuntimeException.class,
                     () -> kafkaConsumerService.consumeLetterMessage(letterRecord, acknowledgment));
 
-            // Debug Log Message
-            var debugData = getDataFromLogMessage(outputCapture, "debug", "Consuming letter record: " + letterRecord);
-            assertCommonFields(debugData, LETTER_TOPIC, mockLetterNotification.toString());
+            var debugData = getDataFromLogMessage(outputCapture, DEBUG,
+                    "Consuming letter record: " + letterRecord);
+            assertLetterCommonFields(debugData);
 
-            // Info Log Message
-            var infoData = getDataFromLogMessage(outputCapture, "info", "Consuming letter record with sender reference: letter-ref-456");
-            assertCommonFields(infoData, LETTER_TOPIC, mockLetterNotification.toString());
+            var infoData = getDataFromLogMessage(outputCapture, INFO,
+                    "Consuming letter record with sender reference: letter-ref-456");
+            assertLetterCommonFields(infoData);
         }
 
         // Then
@@ -213,19 +213,18 @@ class KafkaConsumerServiceTest {
             assertThrows(RuntimeException.class,
                     () -> kafkaConsumerService.consumeEmailMessage(emailRecord, acknowledgment));
 
-            // Debug Log Message
-            var debugData = getDataFromLogMessage(outputCapture, "debug", "Consuming email record: " + emailRecord);
-            assertCommonFields(debugData, EMAIL_TOPIC, mockEmailNotification.toString());
+            var debugData = getDataFromLogMessage(outputCapture, DEBUG,
+                    "Consuming email record: " + emailRecord);
+            assertEmailCommonFields(debugData);
 
-            // Info Log Message
-            var infoData = getDataFromLogMessage(outputCapture, "info", "Consuming email record with sender reference: email-ref-123");
-            assertCommonFields(infoData, EMAIL_TOPIC, mockEmailNotification.toString());
+            var infoData = getDataFromLogMessage(outputCapture, INFO,
+                    "Consuming email record with sender reference: email-ref-123");
+            assertEmailCommonFields(infoData);
 
-            // Error Log Message
-            var errorData = getDataFromLogMessage(outputCapture, "error",
+            var errorData = getDataFromLogMessage(outputCapture, ERROR,
                     "Failed to send email request to integration API");
             assertJsonHasAndEquals(errorData, "error_message", "API failed");
-            assertCommonFields(errorData, EMAIL_TOPIC, mockEmailNotification.toString());
+            assertEmailCommonFields(errorData);
 
         }
 
@@ -272,21 +271,18 @@ class KafkaConsumerServiceTest {
             assertThrows(RuntimeException.class,
                     () -> spyKafkaConsumerService.consumeEmailMessage(emailRecord, acknowledgment));
 
-            // Debug Log Message
-            var debugData = getDataFromLogMessage(outputCapture, "debug",
+            var debugData = getDataFromLogMessage(outputCapture, DEBUG,
                     "Consuming email record: " + emailRecord);
-            assertCommonFields(debugData, EMAIL_TOPIC, mockEmailNotification.toString());
+            assertEmailCommonFields(debugData);
 
-            // Info Log Message
-            var infoData = getDataFromLogMessage(outputCapture, "info",
+            var infoData = getDataFromLogMessage(outputCapture, INFO,
                     "Consuming email record with sender reference: email-ref-123");
-            assertCommonFields(infoData, EMAIL_TOPIC, mockEmailNotification.toString());
+            assertEmailCommonFields(infoData);
 
-            // Error Log Message
-            var errorData = getDataFromLogMessage(outputCapture, "error",
+            var errorData = getDataFromLogMessage(outputCapture, ERROR,
                     "Failed to send email request to integration API");
             assertJsonHasAndEquals(errorData, "error_message", "First attempt failed");
-            assertCommonFields(errorData, EMAIL_TOPIC, mockEmailNotification.toString());
+            assertEmailCommonFields(errorData);
 
         }
 
@@ -299,15 +295,13 @@ class KafkaConsumerServiceTest {
             // When - Second call should succeed
             spyKafkaConsumerService.consumeEmailMessage(emailRecord, acknowledgment);
 
-            // Debug Log Message
-            var debugData = getDataFromLogMessage(outputCapture, "debug",
+            var debugData = getDataFromLogMessage(outputCapture, DEBUG,
                     "Consuming email record: " + emailRecord);
-            assertCommonFields(debugData, EMAIL_TOPIC, mockEmailNotification.toString());
+            assertEmailCommonFields(debugData);
 
-            // Info Log Message
-            var infoData = getDataFromLogMessage(outputCapture, "info",
+            var infoData = getDataFromLogMessage(outputCapture, INFO,
                     "Consuming email record with sender reference: email-ref-123");
-            assertCommonFields(infoData, EMAIL_TOPIC, mockEmailNotification.toString());
+            assertEmailCommonFields(infoData);
         }
         // Then - Verify the retry succeeded and was acknowledged
         verify(messageMapper, times(2)).mapToEmailDetailsRequest(mockEmailNotification);
@@ -335,21 +329,18 @@ class KafkaConsumerServiceTest {
                     () -> spyKafkaConsumerService.consumeLetterMessage(letterRecord,
                             acknowledgment));
 
-            // Debug Log Message
-            var debugData = getDataFromLogMessage(outputCapture, "debug",
+            var debugData = getDataFromLogMessage(outputCapture, DEBUG,
                     "Consuming letter record: " + letterRecord);
-            assertCommonFields(debugData, LETTER_TOPIC, mockLetterNotification.toString());
+            assertLetterCommonFields(debugData);
 
-            // Info Log Message
-            var infoData = getDataFromLogMessage(outputCapture, "info",
+            var infoData = getDataFromLogMessage(outputCapture, INFO,
                     "Consuming letter record with sender reference: letter-ref-456");
-            assertCommonFields(infoData, LETTER_TOPIC, mockLetterNotification.toString());
+            assertLetterCommonFields(infoData);
 
-            // Error Log Message
-            var errorData = getDataFromLogMessage(outputCapture, "error",
+            var errorData = getDataFromLogMessage(outputCapture, ERROR,
                     "Failed to send letter request to integration API");
             assertJsonHasAndEquals(errorData, "error_message", "First attempt failed");
-            assertCommonFields(errorData, LETTER_TOPIC, mockLetterNotification.toString());
+            assertLetterCommonFields(errorData);
         }
 
         // Verify first attempt behavior
@@ -362,14 +353,12 @@ class KafkaConsumerServiceTest {
         try (var outputCapture = new OutputCapture()) {
             spyKafkaConsumerService.consumeLetterMessage(letterRecord, acknowledgment);
 
-            // Debug Log Message
-            var debugData = getDataFromLogMessage(outputCapture, "debug",
+            var debugData = getDataFromLogMessage(outputCapture, DEBUG,
                     "Consuming letter record: " + letterRecord);
-            assertCommonFields(debugData, "chs-notification-letter",
-                    mockLetterNotification.toString());
+            assertLetterCommonFields(debugData);
 
             // Test Info Log Message
-            getDataFromLogMessage(outputCapture, "info",
+            getDataFromLogMessage(outputCapture, INFO,
                     "Consuming letter record with sender reference: letter-ref-456");
 
         }
@@ -397,19 +386,19 @@ class KafkaConsumerServiceTest {
                     () -> kafkaConsumerService.consumeEmailMessage(emailRecord, acknowledgment));
 
             // Test Info Log Message
-            var infoData = getDataFromLogMessage(outputCapture, "info",
+            var infoData = getDataFromLogMessage(outputCapture, INFO,
                     "Consuming email record with sender reference: email-ref-123");
-            assertCommonFields(infoData, EMAIL_TOPIC, mockEmailNotification.toString());
+            assertEmailCommonFields(infoData);
 
             // Test Error Log Message
-            var errorData = getDataFromLogMessage(outputCapture, "error",
+            var errorData = getDataFromLogMessage(outputCapture, ERROR,
                     "Failed to send email request to integration API");
-            assertCommonFields(errorData, EMAIL_TOPIC, mockEmailNotification.toString());
+            assertEmailCommonFields(errorData);
 
             // Test Debug Log Message
-            var debugData = getDataFromLogMessage(outputCapture, "debug",
-                    "Consuming email record: " + emailRecord);
-            assertCommonFields(debugData, EMAIL_TOPIC, mockEmailNotification.toString());
+            var debugData = getDataFromLogMessage(outputCapture, DEBUG,
+"Consuming email record: " + emailRecord);
+            assertEmailCommonFields(debugData);
 
         }
 
@@ -419,6 +408,13 @@ class KafkaConsumerServiceTest {
         verifyNoInteractions(acknowledgment);
     }
 
+    private void assertEmailCommonFields(JsonNode data) {
+        assertCommonFields(data, EMAIL_TOPIC, mockEmailNotification.toString());
+    }
+
+    private void assertLetterCommonFields(JsonNode data) {
+        assertCommonFields(data, LETTER_TOPIC, mockLetterNotification.toString());
+    }
 
     private void assertCommonFields(JsonNode data, String topic, String kafkaMessage) {
         assertJsonHasAndEquals(data, "topic", topic);
