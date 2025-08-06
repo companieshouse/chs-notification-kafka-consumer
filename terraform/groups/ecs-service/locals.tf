@@ -25,11 +25,6 @@ locals {
   healthcheck_path_kafka_error_letter = "/kafka-error-consumer/healthcheck" # healthcheck path for chs-notification-kafka-letter-error"
   docker_repo_kafka_error             = "kafka-error-consumer"
 
-
-  # Enable Eric
-  use_eric_reverse_proxy = true
-  eric_port              = "3001" # container port plus 1
-
   # create a map of secret name => secret arn to pass into ecs service module
   # using the trimprefix function to remove the prefixed path from the secret name
   secrets_arn_map = {
@@ -75,12 +70,3 @@ locals {
   task_environment = concat(local.ssm_global_version_map, local.ssm_service_version_map, [
     { name : "PORT", value : local.container_port }
   ])
-
-  # get eric secrets from global secrets map
-  eric_secrets = [
-    { "name" : "API_KEY", "valueFrom" : local.global_secrets_arn_map.eric_api_key },
-    { "name" : "AES256_KEY", "valueFrom" : local.global_secrets_arn_map.eric_aes256_key }
-  ]
-
-  eric_environment_filename = "eric.env"
-}
