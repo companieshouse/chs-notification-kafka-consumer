@@ -10,6 +10,7 @@ import org.springframework.kafka.retrytopic.SameIntervalTopicReuseStrategy;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.NotifyIntegrationService;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.translator.MessageMapper;
@@ -74,6 +75,10 @@ class KafkaConsumerService {
         notifyIntegrationService.sendEmailMessageToIntegrationApi(emailRequest)
                 .doOnSuccess(v -> acknowledgment.acknowledge())
                 .onErrorResume(e -> {
+                    if (e instanceof WebClientResponseException) {
+                        return Mono.error(e);
+                    }
+                    
                     var logMap = logMapBuilder
                             .errorMessage(e.getMessage())
                             .build()
@@ -115,15 +120,19 @@ class KafkaConsumerService {
                 .offset(consumerRecord.offset())
                 .kafkaMessage(consumerRecord.value().toString());
 
-
         LOG.debug("Consuming letter record: " + consumerRecord, logMapBuilder.build().getLogMap());
         var letterNotification = consumerRecord.value();
         LOG.info("Consuming letter record with sender reference: "
-                + letterNotification.getSenderDetails().getReference(), logMapBuilder.build().getLogMap());
+                        + letterNotification.getSenderDetails().getReference(),
+                logMapBuilder.build().getLogMap());
         final var letterRequest = messageMapper.mapToLetterDetailsRequest(letterNotification);
         notifyIntegrationService.sendLetterMessageToIntegrationApi(letterRequest)
                 .doOnSuccess(v -> acknowledgment.acknowledge())
                 .onErrorResume(e -> {
+                    if (e instanceof WebClientResponseException) {
+                        return Mono.error(e);
+                    }
+
                     Map<String, Object> logMap = logMapBuilder
                             .errorMessage(e.getMessage())
                             .build()
