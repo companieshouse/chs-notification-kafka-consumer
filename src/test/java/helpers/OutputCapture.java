@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import org.apache.commons.io.output.TeeOutputStream;
+import uk.gov.companieshouse.logging.EventType;
 
 public class OutputCapture implements AutoCloseable {
 
@@ -67,11 +68,11 @@ public class OutputCapture implements AutoCloseable {
      * @param index     The index of the event to find (0-based)
      * @return Optional containing the JsonNode if found, otherwise empty
      */
-    public synchronized Optional<JsonNode> findEntryByEvent(String eventName, int index) {
+    public synchronized Optional<JsonNode> findEntryByEvent(EventType eventName, int index) {
         return getJsonEntries().stream()
                 .filter(
                         node -> node.has("event")
-                                && eventName.equals(node.get("event").asText())
+                                && eventName.getName().equals(node.get("event").asText())
                 )
                 .skip(index)
                 .findFirst();
@@ -84,15 +85,15 @@ public class OutputCapture implements AutoCloseable {
      * @param index     The index of the event to find (0-based)
      * @return Optional containing the "data" field if found, otherwise empty
      */
-    public Optional<JsonNode> findDataByEvent(String eventName, int index) {
+    public Optional<JsonNode> findDataByEvent(EventType eventName, int index) {
         return findEntryByEvent(eventName, index).map(node -> node.get("data"));
     }
 
-    public long findAmountByEvent(String eventName) {
+    public long findAmountByEvent(EventType eventName) {
         return getJsonEntries().stream()
                 .filter(
                         node -> node.has("event")
-                                && eventName.equals(node.get("event").asText())
+                                && eventName.getName().equals(node.get("event").asText())
                 )
                 .count();
     }

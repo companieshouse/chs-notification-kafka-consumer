@@ -16,6 +16,7 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono;
 import uk.gov.companieshouse.api.chs.notification.model.GovUkEmailDetailsRequest;
 import uk.gov.companieshouse.api.chs.notification.model.GovUkLetterDetailsRequest;
+import uk.gov.companieshouse.logging.EventType;
 
 import static helpers.utils.OutputAssertions.assertJsonHasAndEquals;
 import static helpers.utils.OutputAssertions.getDataFromLogMessage;
@@ -78,11 +79,12 @@ class ApiIntegrationInterfaceTest {
                     .onErrorResume(e -> Mono.empty())
                     .block();
 
-            var amountOfErrorLogs = outputCapture.findAmountByEvent("error");
+            var amountOfErrorLogs = outputCapture.findAmountByEvent(EventType.ERROR);
             assertEquals(1, amountOfErrorLogs,
                     "Should show an error log for the failed API call");
 
-            var errorLog = getDataFromLogMessage(outputCapture, "error", "Email API call failed");
+            var errorLog = getDataFromLogMessage(outputCapture, EventType.ERROR,
+                    "Email API call failed");
             assertJsonHasAndEquals(errorLog, "uri", "/email");
             assertJsonHasAndEquals(errorLog, "status", "500");
         }
@@ -105,11 +107,12 @@ class ApiIntegrationInterfaceTest {
                     .onErrorResume(e -> Mono.empty())
                     .block();
 
-            var amountOfErrorLogs = outputCapture.findAmountByEvent("error");
+            var amountOfErrorLogs = outputCapture.findAmountByEvent(EventType.ERROR);
             assertEquals(1, amountOfErrorLogs,
                     "Should show an error log for the failed API call");
 
-            var errorLog = getDataFromLogMessage(outputCapture, "error", "Letter API call failed");
+            var errorLog = getDataFromLogMessage(outputCapture, EventType.ERROR,
+                    "Letter API call failed");
             assertJsonHasAndEquals(errorLog, "uri", "/letter");
             assertJsonHasAndEquals(errorLog, "status", "500");
         }
@@ -133,7 +136,7 @@ class ApiIntegrationInterfaceTest {
                     service.sendEmailMessageToIntegrationApi(new GovUkEmailDetailsRequest())
                             .block());
 
-            var amountOfErrorLogs = outputCapture.findAmountByEvent("error");
+            var amountOfErrorLogs = outputCapture.findAmountByEvent(EventType.ERROR);
             assertEquals(0, amountOfErrorLogs,
                     "Should not log an error for a successful response");
         }
@@ -158,7 +161,7 @@ class ApiIntegrationInterfaceTest {
                     service.sendLetterMessageToIntegrationApi(new GovUkLetterDetailsRequest())
                             .block());
 
-            var amountOfErrorLogs = outputCapture.findAmountByEvent("error");
+            var amountOfErrorLogs = outputCapture.findAmountByEvent(EventType.ERROR);
             assertEquals(0, amountOfErrorLogs,
                     "Should not log an error for a successful response");
         }

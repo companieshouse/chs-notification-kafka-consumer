@@ -4,6 +4,7 @@ package helpers.utils;
 import com.fasterxml.jackson.databind.JsonNode;
 import helpers.OutputCapture;
 import org.junit.jupiter.api.Assertions;
+import uk.gov.companieshouse.logging.EventType;
 
 public class OutputAssertions {
 
@@ -15,21 +16,22 @@ public class OutputAssertions {
      * @return the “data” JsonNode for that entry
      * @throws AssertionError if the entry or its “data” field is missing
      */
-    public static JsonNode getDataFromLogMessage(OutputCapture capture, String event,
+    public static JsonNode getDataFromLogMessage(OutputCapture capture, EventType event,
             String message) {
+        var eventName = event.getName();
         var entries = capture.getJsonEntries();
         if (entries.isEmpty()) {
-            throw new AssertionError("No log entries found for event: " + event);
+            throw new AssertionError("No log entries found for event: " + eventName);
         }
         var matchingEventEntries = entries.stream()
-                .filter(e -> e.has("event") && event.equals(e.get("event").asText()))
+                .filter(e -> e.has("event") && eventName.equals(e.get("event").asText()))
                 .filter(e -> e.has("data") && e.get("data").has("message"))
                 .map(e -> e.get("data"))
                 .toList();
 
         if (matchingEventEntries.isEmpty()) {
             throw new AssertionError(
-                    "No log entries found for event: '" + event + "' with a 'data.message' field.");
+                    "No log entries found for event: '" + eventName + "' with a 'data.message' field.");
         }
 
         return matchingEventEntries.stream()
