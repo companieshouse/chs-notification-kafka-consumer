@@ -6,8 +6,6 @@ locals {
   service_name                        = "chs-notification-kafka-consumer"
   container_port                      = "8080" # default Java port to match start script
   docker_repo                         = "chs-notification-kafka-consumer"
-  lb_listener_rule_priority           = 25
-  lb_listener_paths                   = ["/notification-consumer/healthcheck"]
   healthcheck_path                    = "/notification-consumer/healthcheck" #healthcheck path for chs-notification-kafka-consumer service
   healthcheck_matcher                 = "200"
   application_subnet_ids              = data.aws_subnets.application.ids
@@ -26,11 +24,6 @@ locals {
   healthcheck_path_kafka_error_email  = "/kafka-error-consumer/healthcheck" # healthcheck path for chs-notification-kafka-email-error"
   healthcheck_path_kafka_error_letter = "/kafka-error-consumer/healthcheck" # healthcheck path for chs-notification-kafka-letter-error"
   docker_repo_kafka_error             = "kafka-error-consumer"
-
-
-  # Enable Eric
-  use_eric_reverse_proxy = true
-  eric_port              = "3001" # container port plus 1
 
   # create a map of secret name => secret arn to pass into ecs service module
   # using the trimprefix function to remove the prefixed path from the secret name
@@ -74,13 +67,7 @@ locals {
   # TODO: task_secrets don't seem to correspond with 'parameter_store_secrets'. What is the difference?
   task_secrets = concat(local.global_secret_list, local.service_secret_list)
 
-  task_environment = concat(local.ssm_global_version_map, local.ssm_service_version_map)
-
-  # get eric secrets from global secrets map
-  eric_secrets = [
-    { "name" : "API_KEY", "valueFrom" : local.global_secrets_arn_map.eric_api_key },
-    { "name" : "AES256_KEY", "valueFrom" : local.global_secrets_arn_map.eric_aes256_key }
-  ]
-
-  eric_environment_filename = "eric.env"
+  task_environment = concat(local.ssm_global_version_map, local.ssm_service_version_map, [
+    { name : "PORT", value : local.container_port }
+  ])
 }

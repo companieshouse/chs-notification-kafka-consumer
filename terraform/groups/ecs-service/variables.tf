@@ -184,7 +184,7 @@ variable "ssm_version_prefix" {
 
 variable "use_set_environment_files" {
   type        = bool
-  default     = true
+  default     = false
   description = "Toggle default global and shared  environment files"
 }
 
@@ -202,23 +202,5 @@ variable "chs_notification_kafka_consumer_version" {
 variable "kafka_error_consumer_version" {
   type        = string
   description = "The version of the kafka_error_consumer container to run."
-}
-
-# ------------------------------------------------------------------------------
-# ERIC environment variable configs
-# ------------------------------------------------------------------------------
-variable "eric_cpus" {
-  type        = number
-  description = "The required cpu resource for eric. 1024 here is 1 vCPU"
-  default     = 256
-}
-variable "eric_memory" {
-  type        = number
-  description = "The required memory for eric"
-  default     = 512
-}
-variable "eric_version" {
-  type        = string
-  description = "The version of the eric container to run."
 }
 
