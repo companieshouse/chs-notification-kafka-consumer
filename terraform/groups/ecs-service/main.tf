@@ -94,7 +94,7 @@ module "ecs-service-kafka-email-error" {
   # Scheduler configuration
   enable_scale_up_eventbridge_scheduler   = var.enable_scale_up_eventbridge_scheduler
   enable_scale_down_eventbridge_scheduler = var.enable_scale_down_eventbridge_scheduler
-  eventbridge_group_name                  = "${local.name_prefix}-email"
+  eventbridge_group_name                  = local.name_prefix
   startup_eventbridge_scheduler_cron      = var.startup_eventbridge_scheduler_cron
   shutdown_eventbridge_scheduler_cron     = var.shutdown_eventbridge_scheduler_cron
 
@@ -111,7 +111,7 @@ module "ecs-service-kafka-email-error" {
 
   # Service configuration
   service_name                         = local.service_name_kafka_error_email
-  name_prefix                          = local.name_prefix
+  name_prefix                          = "${local.name_prefix}-email"
   desired_task_count                   = var.desired_task_count_kafka_error
   min_task_count                       = var.min_task_count_kafka_error
   max_task_count                       = var.max_task_count_kafka_error
@@ -152,7 +152,7 @@ module "ecs-service-kafka-letter-error" {
   # Scheduler configuration
   enable_scale_up_eventbridge_scheduler   = var.enable_scale_up_eventbridge_scheduler
   enable_scale_down_eventbridge_scheduler = var.enable_scale_down_eventbridge_scheduler
-  eventbridge_group_name                  = "${local.name_prefix}-letter"
+  eventbridge_group_name                  = local.name_prefix
   startup_eventbridge_scheduler_cron      = var.startup_eventbridge_scheduler_cron
   shutdown_eventbridge_scheduler_cron     = var.shutdown_eventbridge_scheduler_cron
 
@@ -169,7 +169,7 @@ module "ecs-service-kafka-letter-error" {
 
   # Service configuration
   service_name                         = local.service_name_kafka_error_letter
-  name_prefix                          = local.name_prefix
+  name_prefix                          = "${local.name_prefix}-letter"
   desired_task_count                   = var.desired_task_count_kafka_error
   min_task_count                       = var.min_task_count_kafka_error
   max_task_count                       = var.max_task_count_kafka_error
