@@ -80,8 +80,6 @@ module "ecs-service" {
 module "ecs-service-kafka-email-error" {
   source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.338"
 
-  name_prefix = "${local.name_prefix}-email"
-
   # Environmental configuration
   environment                    = var.environment
   aws_region                     = var.aws_region
@@ -96,7 +94,7 @@ module "ecs-service-kafka-email-error" {
   # Scheduler configuration
   enable_scale_up_eventbridge_scheduler   = var.enable_scale_up_eventbridge_scheduler
   enable_scale_down_eventbridge_scheduler = var.enable_scale_down_eventbridge_scheduler
-  eventbridge_group_name                  = local.name_prefix
+  eventbridge_group_name                  = "${local.name_prefix}-email"
   startup_eventbridge_scheduler_cron      = var.startup_eventbridge_scheduler_cron
   shutdown_eventbridge_scheduler_cron     = var.shutdown_eventbridge_scheduler_cron
 
@@ -140,8 +138,6 @@ module "ecs-service-kafka-email-error" {
 module "ecs-service-kafka-letter-error" {
   source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.338"
 
-  name_prefix = "${local.name_prefix}-letter"
-
   # Environmental configuration
   environment                    = var.environment
   aws_region                     = var.aws_region
@@ -156,7 +152,7 @@ module "ecs-service-kafka-letter-error" {
   # Scheduler configuration
   enable_scale_up_eventbridge_scheduler   = var.enable_scale_up_eventbridge_scheduler
   enable_scale_down_eventbridge_scheduler = var.enable_scale_down_eventbridge_scheduler
-  eventbridge_group_name                  = local.name_prefix
+  eventbridge_group_name                  = "${local.name_prefix}-letter"
   startup_eventbridge_scheduler_cron      = var.startup_eventbridge_scheduler_cron
   shutdown_eventbridge_scheduler_cron     = var.shutdown_eventbridge_scheduler_cron
 
