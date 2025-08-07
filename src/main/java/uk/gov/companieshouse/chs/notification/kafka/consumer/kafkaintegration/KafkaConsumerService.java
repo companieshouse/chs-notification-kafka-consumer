@@ -25,7 +25,7 @@ import static uk.gov.companieshouse.chs.notification.kafka.consumer.ChsNotificat
 @Service
 class KafkaConsumerService {
 
-    static final Logger LOG = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
+    private static final Logger LOG = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
     private final NotifyIntegrationService notifyIntegrationService;
     private final MessageMapper messageMapper;
