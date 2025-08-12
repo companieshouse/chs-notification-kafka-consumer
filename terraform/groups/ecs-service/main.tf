@@ -169,7 +169,7 @@ module "ecs-service-kafka-letter-error" {
 
   # Service configuration
   service_name                         = local.service_name_kafka_error_letter
-  name_prefix                          = "${local.name_prefix}-letter"
+  name_prefix                          = local.name_prefix
   desired_task_count                   = var.desired_task_count_kafka_error
   min_task_count                       = var.min_task_count_kafka_error
   max_task_count                       = var.max_task_count_kafka_error
