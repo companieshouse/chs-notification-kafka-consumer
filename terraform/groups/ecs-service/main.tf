@@ -19,7 +19,7 @@ terraform {
 }
 
 module "secrets" {
-  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/secrets?ref=1.0.338"
+  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/secrets?ref=feature/name-prefix"
 
   name_prefix = "${local.service_name}-${var.environment}"
   environment = var.environment
@@ -28,7 +28,7 @@ module "secrets" {
 }
 
 module "ecs-service" {
-  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.338"
+  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=feature/name-prefix"
 
   # Environmental configuration
   environment             = var.environment
@@ -78,7 +78,7 @@ module "ecs-service" {
 }
 
 module "ecs-service-kafka-email-error" {
-  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.338"
+  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=feature/name-prefix"
 
   # Environmental configuration
   environment                    = var.environment
@@ -136,7 +136,7 @@ module "ecs-service-kafka-email-error" {
 }
 
 module "ecs-service-kafka-letter-error" {
-  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=1.0.338"
+  source = "git@github.com:companieshouse/terraform-modules//aws/ecs/ecs-service?ref=feature/name-prefix"
 
   # Environmental configuration
   environment                    = var.environment
@@ -169,7 +169,7 @@ module "ecs-service-kafka-letter-error" {
 
   # Service configuration
   service_name                         = local.service_name_kafka_error_letter
-  name_prefix                          = "${local.name_prefix}-letter"
+  name_prefix                          = local.name_prefix
   desired_task_count                   = var.desired_task_count_kafka_error
   min_task_count                       = var.min_task_count_kafka_error
   max_task_count                       = var.max_task_count_kafka_error
