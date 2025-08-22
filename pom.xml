@@ -56,7 +56,7 @@
         <!-- CVE-2025-41234 -->
         <spring-web.version>6.2.8</spring-web.version>
         <!-- CVE-2025-49124, CVE-2025-49125, CVE-2025-46701, CVE-2025-48988 -->
-        <tomcat-embed.version>10.1.43</tomcat-embed.version>
+        <tomcat-embed.version>10.1.44</tomcat-embed.version>
         <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
         <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
         <sonar.login></sonar.login>
