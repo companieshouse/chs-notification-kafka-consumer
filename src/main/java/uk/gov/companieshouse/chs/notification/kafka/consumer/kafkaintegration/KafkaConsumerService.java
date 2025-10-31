@@ -20,6 +20,7 @@ import uk.gov.companieshouse.logging.util.DataMap;
 import uk.gov.companieshouse.notification.ChsEmailNotification;
 import uk.gov.companieshouse.notification.ChsLetterNotification;
 
+import static com.google.common.net.HttpHeaders.X_REQUEST_ID;
 import static uk.gov.companieshouse.chs.notification.kafka.consumer.ChsNotificationKafkaConsumerApplication.APPLICATION_NAMESPACE;
 
 @Service
@@ -59,10 +60,16 @@ class KafkaConsumerService {
     )
     public void consumeEmailMessage(ConsumerRecord<String, ChsEmailNotification> consumerRecord,
             Acknowledgment acknowledgment) {
+
+        // TODO DEEP-490 Make sure it's OK if there is no such header.
+        var contextHeader = consumerRecord.headers().lastHeader(X_REQUEST_ID);
+        var contextId = contextHeader != null ? new String(contextHeader.value()) : null;
+
         var logMapBuilder = new DataMap.Builder()
                 .topic(consumerRecord.topic())
                 .partition(consumerRecord.partition())
                 .offset(consumerRecord.offset())
+                .contextId(contextId)
                 .kafkaMessage(consumerRecord.value().toString());
 
         LOG.debug("Consuming email record: " + consumerRecord, logMapBuilder.build().getLogMap());
@@ -72,7 +79,7 @@ class KafkaConsumerService {
                 logMapBuilder.build().getLogMap());
 
         final var emailRequest = messageMapper.mapToEmailDetailsRequest(emailNotification);
-        notifyIntegrationService.sendEmailMessageToIntegrationApi(emailRequest)
+        notifyIntegrationService.sendEmailMessageToIntegrationApi(emailRequest, contextId)
                 .doOnSuccess(v -> acknowledgment.acknowledge())
                 .onErrorResume(e -> {
                     if (e instanceof WebClientResponseException) {
@@ -114,10 +121,16 @@ class KafkaConsumerService {
     )
     public void consumeLetterMessage(ConsumerRecord<String, ChsLetterNotification> consumerRecord,
             Acknowledgment acknowledgment) {
+
+        // TODO DEEP-490 Make sure it's OK if there is no such header.
+        var contextHeader = consumerRecord.headers().lastHeader(X_REQUEST_ID);
+        var contextId = contextHeader != null ? new String(contextHeader.value()) : null;
+
         var logMapBuilder = new DataMap.Builder()
                 .topic(consumerRecord.topic())
                 .partition(consumerRecord.partition())
                 .offset(consumerRecord.offset())
+                .contextId(contextId)
                 .kafkaMessage(consumerRecord.value().toString());
 
         LOG.debug("Consuming letter record: " + consumerRecord, logMapBuilder.build().getLogMap());
@@ -126,7 +139,7 @@ class KafkaConsumerService {
                         + letterNotification.getSenderDetails().getReference(),
                 logMapBuilder.build().getLogMap());
         final var letterRequest = messageMapper.mapToLetterDetailsRequest(letterNotification);
-        notifyIntegrationService.sendLetterMessageToIntegrationApi(letterRequest)
+        notifyIntegrationService.sendLetterMessageToIntegrationApi(letterRequest, contextId)
                 .doOnSuccess(v -> acknowledgment.acknowledge())
                 .onErrorResume(e -> {
                     if (e instanceof WebClientResponseException) {
