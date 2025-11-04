@@ -23,6 +23,7 @@ import static helpers.utils.OutputAssertions.getDataFromLogMessage;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static uk.gov.companieshouse.chs.notification.kafka.consumer.Constants.TOKEN_CONTEXT_ID;
 
 @SpringBootTest
 @Tag("unit-test")
@@ -36,7 +37,7 @@ class ApiIntegrationInterfaceTest {
     void When_NullEmailRequest_Expect_ConstraintViolationException() {
         assertThrowsExactly(ConstraintViolationException.class,
                 () -> notifyIntegrationService.sendEmailMessageToIntegrationApi(null,
-                        "TODO DEEP-490"),
+                        TOKEN_CONTEXT_ID),
                 "Should throw ConstraintViolationException for null email request");
     }
 
@@ -44,7 +45,7 @@ class ApiIntegrationInterfaceTest {
     void When_EmptyEmailRequest_Expect_ConstraintViolationException() {
         assertThrowsExactly(ConstraintViolationException.class,
                 () -> notifyIntegrationService.sendEmailMessageToIntegrationApi(
-                        new GovUkEmailDetailsRequest(), "TODO DEEP-490"),
+                        new GovUkEmailDetailsRequest(), TOKEN_CONTEXT_ID),
                 "Should throw ConstraintViolationException for empty email request");
     }
 
@@ -52,7 +53,7 @@ class ApiIntegrationInterfaceTest {
     void When_NullLetterRequest_Expect_ConstraintViolationException() {
         assertThrowsExactly(ConstraintViolationException.class,
                 () -> notifyIntegrationService.sendLetterMessageToIntegrationApi(null,
-                        "TODO DEEP-490"),
+                        TOKEN_CONTEXT_ID),
                 "Should throw ConstraintViolationException for null letter request");
     }
 
@@ -60,7 +61,7 @@ class ApiIntegrationInterfaceTest {
     void When_EmptyLetterRequest_Expect_ConstraintViolationException() {
         assertThrowsExactly(ConstraintViolationException.class,
                 () -> notifyIntegrationService.sendLetterMessageToIntegrationApi(
-                        new GovUkLetterDetailsRequest(), "TODO DEEP-490"),
+                        new GovUkLetterDetailsRequest(), TOKEN_CONTEXT_ID),
                 "Should throw ConstraintViolationException for empty letter request");
     }
 
@@ -78,7 +79,7 @@ class ApiIntegrationInterfaceTest {
 
         try (var outputCapture = new OutputCapture()) {
             service.sendEmailMessageToIntegrationApi(new GovUkEmailDetailsRequest(),
-                            "TODO DEEP-490")
+                            TOKEN_CONTEXT_ID)
                     .onErrorResume(e -> Mono.empty())
                     .block();
 
@@ -107,7 +108,7 @@ class ApiIntegrationInterfaceTest {
 
         try (var outputCapture = new OutputCapture()) {
             service.sendLetterMessageToIntegrationApi(new GovUkLetterDetailsRequest(),
-                            "TODO DEEP-490")
+                            TOKEN_CONTEXT_ID)
                     .onErrorResume(e -> Mono.empty())
                     .block();
 
@@ -138,7 +139,7 @@ class ApiIntegrationInterfaceTest {
 
             assertDoesNotThrow(() ->
                     service.sendEmailMessageToIntegrationApi(new GovUkEmailDetailsRequest(),
-                                    "TODO DEEP-490")
+                                    TOKEN_CONTEXT_ID)
                             .block());
 
             var amountOfErrorLogs = outputCapture.findAmountByEvent(EventType.ERROR);
@@ -164,7 +165,7 @@ class ApiIntegrationInterfaceTest {
 
             assertDoesNotThrow(() ->
                     service.sendLetterMessageToIntegrationApi(new GovUkLetterDetailsRequest(),
-                                    "TODO DEEP-490")
+                                    TOKEN_CONTEXT_ID)
                             .block());
 
             var amountOfErrorLogs = outputCapture.findAmountByEvent(EventType.ERROR);

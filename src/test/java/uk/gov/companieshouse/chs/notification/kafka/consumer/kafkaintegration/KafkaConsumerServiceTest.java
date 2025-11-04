@@ -25,16 +25,16 @@ import uk.gov.companieshouse.notification.ChsLetterNotification;
 import uk.gov.companieshouse.notification.SenderDetails;
 
 
+import static com.google.common.net.HttpHeaders.X_REQUEST_ID;
 import static helpers.utils.OutputAssertions.assertJsonHasAndEquals;
 import static helpers.utils.OutputAssertions.getDataFromLogMessage;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
+import static uk.gov.companieshouse.chs.notification.kafka.consumer.Constants.TOKEN_CONTEXT_ID;
 
 @ExtendWith(MockitoExtension.class)
 @Tag("unit-test")
@@ -86,7 +86,9 @@ class KafkaConsumerServiceTest {
         mockLetterRequest = new GovUkLetterDetailsRequest();
 
         emailRecord = new ConsumerRecord<>(EMAIL_TOPIC, 0, 0L, "key", mockEmailNotification);
+        emailRecord.headers().add(X_REQUEST_ID, TOKEN_CONTEXT_ID.getBytes());
         letterRecord = new ConsumerRecord<>(LETTER_TOPIC, 0, 0L, "key", mockLetterNotification);
+        letterRecord.headers().add(X_REQUEST_ID, TOKEN_CONTEXT_ID.getBytes());
     }
 
     @Test
@@ -95,7 +97,7 @@ class KafkaConsumerServiceTest {
         when(messageMapper.mapToEmailDetailsRequest(mockEmailNotification)).thenReturn(
                 mockEmailRequest);
         when(notifyIntegrationService.sendEmailMessageToIntegrationApi(
-                mockEmailRequest, /*anyString()*/null)).thenReturn(Mono.empty());
+                mockEmailRequest, TOKEN_CONTEXT_ID)).thenReturn(Mono.empty());
 
         try (var outputCapture = new OutputCapture()) {
             // When
@@ -112,7 +114,8 @@ class KafkaConsumerServiceTest {
 
         // Then
         verify(messageMapper).mapToEmailDetailsRequest(mockEmailNotification);
-        verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(mockEmailRequest, null);
+        verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(mockEmailRequest,
+                TOKEN_CONTEXT_ID);
         verify(acknowledgment).acknowledge();
     }
 
@@ -122,7 +125,7 @@ class KafkaConsumerServiceTest {
         when(messageMapper.mapToLetterDetailsRequest(mockLetterNotification)).thenReturn(
                 mockLetterRequest);
         when(notifyIntegrationService.sendLetterMessageToIntegrationApi(
-                mockLetterRequest, null)).thenReturn(Mono.empty());
+                mockLetterRequest, TOKEN_CONTEXT_ID)).thenReturn(Mono.empty());
 
         try (var outputCapture = new OutputCapture()) {
             // When
@@ -138,7 +141,7 @@ class KafkaConsumerServiceTest {
 
         // Then
         verify(messageMapper).mapToLetterDetailsRequest(mockLetterNotification);
-        verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest, null);
+        verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest, TOKEN_CONTEXT_ID);
         verify(acknowledgment).acknowledge();
     }
 
@@ -207,7 +210,7 @@ class KafkaConsumerServiceTest {
         when(messageMapper.mapToEmailDetailsRequest(mockEmailNotification)).thenReturn(
                 mockEmailRequest);
         when(notifyIntegrationService.sendEmailMessageToIntegrationApi(
-                mockEmailRequest, null)).thenReturn(Mono.error(apiException));
+                mockEmailRequest, TOKEN_CONTEXT_ID)).thenReturn(Mono.error(apiException));
 
         try (var outputCapture = new OutputCapture()) {
             // When/Then
@@ -229,7 +232,8 @@ class KafkaConsumerServiceTest {
 
         // Then
         verify(messageMapper).mapToEmailDetailsRequest(mockEmailNotification);
-        verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(mockEmailRequest, null);
+        verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(mockEmailRequest,
+                TOKEN_CONTEXT_ID);
         verifyNoInteractions(acknowledgment);
     }
 
@@ -240,7 +244,7 @@ class KafkaConsumerServiceTest {
         when(messageMapper.mapToLetterDetailsRequest(mockLetterNotification)).thenReturn(
                 mockLetterRequest);
         when(notifyIntegrationService.sendLetterMessageToIntegrationApi(
-                mockLetterRequest, null)).thenReturn(Mono.error(apiException));
+                mockLetterRequest, TOKEN_CONTEXT_ID)).thenReturn(Mono.error(apiException));
 
         // When/Then
         assertThrows(RuntimeException.class,
@@ -249,7 +253,7 @@ class KafkaConsumerServiceTest {
         // Then
         verify(messageMapper).mapToLetterDetailsRequest(mockLetterNotification);
         verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest,
-                null);
+                TOKEN_CONTEXT_ID);
         verifyNoInteractions(acknowledgment);
     }
 
@@ -263,7 +267,7 @@ class KafkaConsumerServiceTest {
         when(messageMapper.mapToEmailDetailsRequest(mockEmailNotification)).thenReturn(
                 mockEmailRequest);
         when(notifyIntegrationService.sendEmailMessageToIntegrationApi(
-                mockEmailRequest, null)).thenReturn(
+                mockEmailRequest, TOKEN_CONTEXT_ID)).thenReturn(
                 Mono.error(new RuntimeException("First attempt failed"))).thenReturn(Mono.empty());
 
         try (var outputCapture = new OutputCapture()) {
@@ -286,7 +290,8 @@ class KafkaConsumerServiceTest {
 
         // Verify first attempt behavior
         verify(messageMapper).mapToEmailDetailsRequest(mockEmailNotification);
-        verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(mockEmailRequest, null);
+        verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(mockEmailRequest,
+                TOKEN_CONTEXT_ID);
         verifyNoInteractions(acknowledgment);
 
         try (var outputCapture = new OutputCapture()) {
@@ -303,7 +308,7 @@ class KafkaConsumerServiceTest {
         // Then - Verify the retry succeeded and was acknowledged
         verify(messageMapper, times(2)).mapToEmailDetailsRequest(mockEmailNotification);
         verify(notifyIntegrationService, times(2)).sendEmailMessageToIntegrationApi(
-                mockEmailRequest, null);
+                mockEmailRequest, TOKEN_CONTEXT_ID);
         verify(acknowledgment).acknowledge();
     }
 
@@ -317,7 +322,7 @@ class KafkaConsumerServiceTest {
         when(messageMapper.mapToLetterDetailsRequest(mockLetterNotification)).thenReturn(
                 mockLetterRequest);
         when(notifyIntegrationService.sendLetterMessageToIntegrationApi(
-                mockLetterRequest, null)).thenReturn(
+                mockLetterRequest, TOKEN_CONTEXT_ID)).thenReturn(
                 Mono.error(new RuntimeException("First attempt failed"))).thenReturn(Mono.empty());
 
         try (var outputCapture = new OutputCapture()) {
@@ -340,8 +345,10 @@ class KafkaConsumerServiceTest {
 
         // Verify first attempt behavior
         verify(messageMapper).mapToLetterDetailsRequest(mockLetterNotification);
-        verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest, null);
-        verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest, null);
+        verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest,
+                TOKEN_CONTEXT_ID);
+        verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest,
+                TOKEN_CONTEXT_ID);
         verifyNoInteractions(acknowledgment);
 
         // When - Second call should succeed
@@ -359,7 +366,7 @@ class KafkaConsumerServiceTest {
         // Then - Verify the retry succeeded and was acknowledged
         verify(messageMapper, times(2)).mapToLetterDetailsRequest(mockLetterNotification);
         verify(notifyIntegrationService, times(2)).sendLetterMessageToIntegrationApi(
-                mockLetterRequest, null);
+                mockLetterRequest, TOKEN_CONTEXT_ID);
         verify(acknowledgment).acknowledge();
     }
 
@@ -371,7 +378,7 @@ class KafkaConsumerServiceTest {
         when(messageMapper.mapToEmailDetailsRequest(mockEmailNotification)).thenReturn(
                 mockEmailRequest);
         when(notifyIntegrationService.sendEmailMessageToIntegrationApi(
-                mockEmailRequest, null)).thenReturn(Mono.error(nonRetryableError));
+                mockEmailRequest, TOKEN_CONTEXT_ID)).thenReturn(Mono.error(nonRetryableError));
 
         try (var outputCapture = new OutputCapture()) {
             // When/Then - Exception should propagate without retry
@@ -395,7 +402,8 @@ class KafkaConsumerServiceTest {
 
         // Then
         verify(messageMapper).mapToEmailDetailsRequest(mockEmailNotification);
-        verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(mockEmailRequest, null);
+        verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(mockEmailRequest,
+                TOKEN_CONTEXT_ID);
         verifyNoInteractions(acknowledgment);
     }
 
@@ -407,7 +415,7 @@ class KafkaConsumerServiceTest {
         when(messageMapper.mapToLetterDetailsRequest(mockLetterNotification)).thenReturn(
                 mockLetterRequest);
         when(notifyIntegrationService.sendLetterMessageToIntegrationApi(
-                mockLetterRequest, null)).thenReturn(Mono.error(nonRetryableError));
+                mockLetterRequest, TOKEN_CONTEXT_ID)).thenReturn(Mono.error(nonRetryableError));
 
         try (var outputCapture = new OutputCapture()) {
             // When/Then - Exception should propagate without retry
@@ -430,7 +438,8 @@ class KafkaConsumerServiceTest {
 
         // Then
         verify(messageMapper).mapToLetterDetailsRequest(mockLetterNotification);
-        verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest, null);
+        verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest,
+                TOKEN_CONTEXT_ID);
         verifyNoInteractions(acknowledgment);
     }
 
