@@ -1,6 +1,7 @@
 package uk.gov.companieshouse.chs.notification.kafka.consumer.kafkaintegration;
 
 import consumer.exception.NonRetryableErrorException;
+import java.time.Duration;
 import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -90,7 +91,7 @@ class KafkaConsumerService {
                     );
                     return Mono.error(e);
                 })
-                .block();
+                .block( Duration.ofSeconds( 20L ) );
     }
 
     /**
@@ -114,35 +115,44 @@ class KafkaConsumerService {
     )
     public void consumeLetterMessage(ConsumerRecord<String, ChsLetterNotification> consumerRecord,
             Acknowledgment acknowledgment) {
-        var logMapBuilder = new DataMap.Builder()
-                .topic(consumerRecord.topic())
-                .partition(consumerRecord.partition())
-                .offset(consumerRecord.offset())
-                .kafkaMessage(consumerRecord.value().toString());
 
-        LOG.debug("Consuming letter record: " + consumerRecord, logMapBuilder.build().getLogMap());
-        var letterNotification = consumerRecord.value();
-        LOG.info("Consuming letter record with sender reference: "
-                        + letterNotification.getSenderDetails().getReference(),
-                logMapBuilder.build().getLogMap());
-        final var letterRequest = messageMapper.mapToLetterDetailsRequest(letterNotification);
-        notifyIntegrationService.sendLetterMessageToIntegrationApi(letterRequest)
-                .doOnSuccess(v -> acknowledgment.acknowledge())
-                .onErrorResume(e -> {
-                    if (e instanceof WebClientResponseException) {
+        try {
+
+            var logMapBuilder = new DataMap.Builder()
+                    .topic(consumerRecord.topic())
+                    .partition(consumerRecord.partition())
+                    .offset(consumerRecord.offset())
+                    .kafkaMessage(consumerRecord.value().toString());
+
+            LOG.debug("Consuming letter record: " + consumerRecord,
+                    logMapBuilder.build().getLogMap());
+            var letterNotification = consumerRecord.value();
+            LOG.info("Consuming letter record with sender reference: "
+                            + letterNotification.getSenderDetails().getReference(),
+                    logMapBuilder.build().getLogMap());
+            final var letterRequest = messageMapper.mapToLetterDetailsRequest(letterNotification);
+            notifyIntegrationService.sendLetterMessageToIntegrationApi(letterRequest)
+                    .doOnSuccess(v -> acknowledgment.acknowledge())
+                    .onErrorResume(e -> {
+                        if (e instanceof WebClientResponseException) {
+                            return Mono.error(e);
+                        }
+
+                        Map<String, Object> logMap = logMapBuilder
+                                .errorMessage(e.getMessage())
+                                .build()
+                                .getLogMap();
+                        LOG.error("Failed to send letter request to integration API",
+                                new Exception(e),
+                                logMap
+                        );
                         return Mono.error(e);
-                    }
+                    })
+                    .block( Duration.ofSeconds( 20L ) );
+        } catch ( Exception exception ){
+            LOG.error( "Error encountered in Letter Consumer: ", exception );
+            throw exception;
+        }
 
-                    Map<String, Object> logMap = logMapBuilder
-                            .errorMessage(e.getMessage())
-                            .build()
-                            .getLogMap();
-                    LOG.error("Failed to send letter request to integration API",
-                            new Exception(e),
-                            logMap
-                    );
-                    return Mono.error(e);
-                })
-                .block();
     }
 }
