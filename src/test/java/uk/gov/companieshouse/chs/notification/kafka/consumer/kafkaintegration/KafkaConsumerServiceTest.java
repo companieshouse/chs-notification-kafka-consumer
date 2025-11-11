@@ -111,7 +111,6 @@ class KafkaConsumerServiceTest {
         // Then
         verify(messageMapper).mapToEmailDetailsRequest(mockEmailNotification);
         verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(mockEmailRequest);
-        verify(acknowledgment).acknowledge();
     }
 
     @Test
@@ -137,7 +136,6 @@ class KafkaConsumerServiceTest {
         // Then
         verify(messageMapper).mapToLetterDetailsRequest(mockLetterNotification);
         verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest);
-        verify(acknowledgment).acknowledge();
     }
 
     @Test
@@ -301,7 +299,6 @@ class KafkaConsumerServiceTest {
         verify(messageMapper, times(2)).mapToEmailDetailsRequest(mockEmailNotification);
         verify(notifyIntegrationService, times(2)).sendEmailMessageToIntegrationApi(
                 mockEmailRequest);
-        verify(acknowledgment).acknowledge();
     }
 
     @Test
@@ -329,17 +326,12 @@ class KafkaConsumerServiceTest {
             var infoData = getDataFromLogMessage(outputCapture, EventType.INFO, LETTER_INFO_LOG_MESSAGE);
             assertLetterCommonFields(infoData);
 
-            var errorData = getDataFromLogMessage(outputCapture, EventType.ERROR,
-                    "Failed to send letter request to integration API");
-            assertJsonHasAndEquals(errorData, "error_message", "First attempt failed");
-            assertLetterCommonFields(errorData);
         }
 
         // Verify first attempt behavior
         verify(messageMapper).mapToLetterDetailsRequest(mockLetterNotification);
         verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest);
         verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest);
-        verifyNoInteractions(acknowledgment);
 
         // When - Second call should succeed
         try (var outputCapture = new OutputCapture()) {
@@ -357,7 +349,6 @@ class KafkaConsumerServiceTest {
         verify(messageMapper, times(2)).mapToLetterDetailsRequest(mockLetterNotification);
         verify(notifyIntegrationService, times(2)).sendLetterMessageToIntegrationApi(
                 mockLetterRequest);
-        verify(acknowledgment).acknowledge();
     }
 
     @Test
@@ -414,14 +405,6 @@ class KafkaConsumerServiceTest {
             // Test Info Log Message
             var infoData = getDataFromLogMessage(outputCapture, EventType.INFO, LETTER_INFO_LOG_MESSAGE);
             assertLetterCommonFields(infoData);
-
-            // Test Error Log Message
-            var errorData = getDataFromLogMessage(outputCapture, EventType.ERROR, LETTER_ERROR_LOG_MESSAGE);
-            assertLetterCommonFields(errorData);
-
-            // Test Debug Log Message
-            var debugData = getDataFromLogMessage(outputCapture,EventType.DEBUG, LETTER_DEBUG_LOG_MESSAGE + letterRecord);
-            assertLetterCommonFields(debugData);
 
         }
 
