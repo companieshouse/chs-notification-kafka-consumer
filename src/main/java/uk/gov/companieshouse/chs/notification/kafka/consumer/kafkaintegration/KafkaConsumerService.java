@@ -2,7 +2,6 @@ package uk.gov.companieshouse.chs.notification.kafka.consumer.kafkaintegration;
 
 import consumer.exception.NonRetryableErrorException;
 import java.time.Duration;
-import java.util.Map;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
@@ -74,12 +73,11 @@ class KafkaConsumerService {
 
         final var emailRequest = messageMapper.mapToEmailDetailsRequest(emailNotification);
         notifyIntegrationService.sendEmailMessageToIntegrationApi(emailRequest)
-                .doOnSuccess(v -> acknowledgment.acknowledge())
                 .onErrorResume(e -> {
                     if (e instanceof WebClientResponseException) {
                         return Mono.error(e);
                     }
-                    
+
                     var logMap = logMapBuilder
                             .errorMessage(e.getMessage())
                             .build()
@@ -132,22 +130,6 @@ class KafkaConsumerService {
                     logMapBuilder.build().getLogMap());
             final var letterRequest = messageMapper.mapToLetterDetailsRequest(letterNotification);
             notifyIntegrationService.sendLetterMessageToIntegrationApi(letterRequest)
-                    .doOnSuccess(v -> acknowledgment.acknowledge())
-                    .onErrorResume(e -> {
-                        if (e instanceof WebClientResponseException) {
-                            return Mono.error(e);
-                        }
-
-                        Map<String, Object> logMap = logMapBuilder
-                                .errorMessage(e.getMessage())
-                                .build()
-                                .getLogMap();
-                        LOG.error("Failed to send letter request to integration API",
-                                new Exception(e),
-                                logMap
-                        );
-                        return Mono.error(e);
-                    })
                     .block( Duration.ofSeconds( 20L ) );
         } catch ( Exception exception ){
             LOG.error( "Error encountered in Letter Consumer: ", exception );
