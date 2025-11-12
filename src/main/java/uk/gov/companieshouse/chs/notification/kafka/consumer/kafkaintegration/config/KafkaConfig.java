@@ -74,7 +74,7 @@ public class KafkaConfig {
     public ConcurrentKafkaListenerContainerFactory<String, ChsLetterNotification> listenerContainerFactoryLetter() {
         ConcurrentKafkaListenerContainerFactory<String, ChsLetterNotification> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(new DefaultKafkaConsumerFactory<>(consumerProps, new StringDeserializer(), letterDeserializer));
-        factory.getContainerProperties().setAckMode(AckMode.RECORD);
+        factory.getContainerProperties().setAckMode(AckMode.MANUAL);
         return factory;
     }
 }
