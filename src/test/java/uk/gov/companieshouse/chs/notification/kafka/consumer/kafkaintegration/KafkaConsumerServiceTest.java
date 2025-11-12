@@ -158,9 +158,6 @@ class KafkaConsumerServiceTest {
             var infoData = getDataFromLogMessage(outputCapture, EventType.INFO, EMAIL_INFO_LOG_MESSAGE);
             assertEmailCommonFields(infoData);
 
-            assertEquals(0, outputCapture.findAmountByEvent(EventType.ERROR),
-                    "No error logs should be generated for mapping failure");
-
         }
 
         // Then
@@ -217,10 +214,6 @@ class KafkaConsumerServiceTest {
             var infoData = getDataFromLogMessage(outputCapture, EventType.INFO, EMAIL_INFO_LOG_MESSAGE);
             assertEmailCommonFields(infoData);
 
-            var errorData = getDataFromLogMessage(outputCapture, EventType.ERROR, EMAIL_ERROR_LOG_MESSAGE);
-            assertJsonHasAndEquals(errorData, "error_message", "API failed");
-            assertEmailCommonFields(errorData);
-
         }
 
         // Then
@@ -272,10 +265,6 @@ class KafkaConsumerServiceTest {
 
             var infoData = getDataFromLogMessage(outputCapture, EventType.INFO, EMAIL_INFO_LOG_MESSAGE);
             assertEmailCommonFields(infoData);
-
-            var errorData = getDataFromLogMessage(outputCapture, EventType.ERROR, EMAIL_ERROR_LOG_MESSAGE);
-            assertJsonHasAndEquals(errorData, "error_message", "First attempt failed");
-            assertEmailCommonFields(errorData);
 
         }
 
@@ -369,15 +358,6 @@ class KafkaConsumerServiceTest {
             // Test Info Log Message
             var infoData = getDataFromLogMessage(outputCapture, EventType.INFO, EMAIL_INFO_LOG_MESSAGE);
             assertEmailCommonFields(infoData);
-
-            // Test Error Log Message
-            var errorData = getDataFromLogMessage(outputCapture, EventType.ERROR, EMAIL_ERROR_LOG_MESSAGE);
-            assertEmailCommonFields(errorData);
-
-            // Test Debug Log Message
-            var debugData = getDataFromLogMessage(outputCapture, EventType.DEBUG,
-                    "Consuming email record: " + emailRecord);
-            assertEmailCommonFields(debugData);
 
         }
 

@@ -10,8 +10,6 @@ import org.springframework.kafka.retrytopic.SameIntervalTopicReuseStrategy;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Mono;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.NotifyIntegrationService;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.translator.MessageMapper;
 import uk.gov.companieshouse.logging.Logger;
@@ -59,37 +57,28 @@ class KafkaConsumerService {
     )
     public void consumeEmailMessage(ConsumerRecord<String, ChsEmailNotification> consumerRecord,
             Acknowledgment acknowledgment) {
-        var logMapBuilder = new DataMap.Builder()
-                .topic(consumerRecord.topic())
-                .partition(consumerRecord.partition())
-                .offset(consumerRecord.offset())
-                .kafkaMessage(consumerRecord.value().toString());
 
-        LOG.debug("Consuming email record: " + consumerRecord, logMapBuilder.build().getLogMap());
-        var emailNotification = consumerRecord.value();
-        LOG.info("Consuming email record with sender reference: "
-                        + emailNotification.getSenderDetails().getReference(),
-                logMapBuilder.build().getLogMap());
+        try {
+            var logMapBuilder = new DataMap.Builder()
+                    .topic(consumerRecord.topic())
+                    .partition(consumerRecord.partition())
+                    .offset(consumerRecord.offset())
+                    .kafkaMessage(consumerRecord.value().toString());
 
-        final var emailRequest = messageMapper.mapToEmailDetailsRequest(emailNotification);
-        notifyIntegrationService.sendEmailMessageToIntegrationApi(emailRequest)
-                .onErrorResume(e -> {
-                    if (e instanceof WebClientResponseException) {
-                        return Mono.error(e);
-                    }
+            LOG.debug("Consuming email record: " + consumerRecord,
+                    logMapBuilder.build().getLogMap());
+            var emailNotification = consumerRecord.value();
+            LOG.info("Consuming email record with sender reference: "
+                            + emailNotification.getSenderDetails().getReference(),
+                    logMapBuilder.build().getLogMap());
 
-                    var logMap = logMapBuilder
-                            .errorMessage(e.getMessage())
-                            .build()
-                            .getLogMap();
-
-                    LOG.error("Failed to send email request to integration API",
-                            new Exception(e),
-                            logMap
-                    );
-                    return Mono.error(e);
-                })
-                .block( Duration.ofSeconds( 20L ) );
+            final var emailRequest = messageMapper.mapToEmailDetailsRequest(emailNotification);
+            notifyIntegrationService.sendEmailMessageToIntegrationApi(emailRequest)
+                    .block(Duration.ofSeconds(20L));
+        } catch ( Exception exception ){
+            LOG.error( "Error encountered in Email Consumer: ", exception );
+            throw exception;
+        }
     }
 
     /**
