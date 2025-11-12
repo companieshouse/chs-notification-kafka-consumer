@@ -18,7 +18,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.listener.ContainerProperties.AckMode;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import uk.gov.companieshouse.notification.ChsEmailNotification;
 import uk.gov.companieshouse.notification.ChsLetterNotification;
@@ -61,7 +61,7 @@ public class KafkaConfig {
         ConcurrentKafkaListenerContainerFactory<String, ChsEmailNotification> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(new DefaultKafkaConsumerFactory<>(consumerProps, new StringDeserializer(), emailDeserializer));
-        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        factory.getContainerProperties().setAckMode(AckMode.RECORD);
         return factory;
     }
 
@@ -74,7 +74,7 @@ public class KafkaConfig {
     public ConcurrentKafkaListenerContainerFactory<String, ChsLetterNotification> listenerContainerFactoryLetter() {
         ConcurrentKafkaListenerContainerFactory<String, ChsLetterNotification> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(new DefaultKafkaConsumerFactory<>(consumerProps, new StringDeserializer(), letterDeserializer));
-        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        factory.getContainerProperties().setAckMode(AckMode.RECORD);
         return factory;
     }
 }
