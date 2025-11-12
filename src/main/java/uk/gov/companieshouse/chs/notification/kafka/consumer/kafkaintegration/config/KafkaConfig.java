@@ -61,7 +61,7 @@ public class KafkaConfig {
         ConcurrentKafkaListenerContainerFactory<String, ChsEmailNotification> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(new DefaultKafkaConsumerFactory<>(consumerProps, new StringDeserializer(), emailDeserializer));
-        factory.getContainerProperties().setAckMode(AckMode.RECORD);
+        factory.getContainerProperties().setAckMode(AckMode.MANUAL);
         return factory;
     }
 
