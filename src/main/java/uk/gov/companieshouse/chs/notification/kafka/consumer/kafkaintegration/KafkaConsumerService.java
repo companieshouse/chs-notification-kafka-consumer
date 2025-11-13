@@ -3,11 +3,14 @@ package uk.gov.companieshouse.chs.notification.kafka.consumer.kafkaintegration;
 import consumer.exception.NonRetryableErrorException;
 import java.time.Duration;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.retrytopic.DltStrategy;
+import org.springframework.kafka.retrytopic.RetryTopicHeaders;
 import org.springframework.kafka.retrytopic.SameIntervalTopicReuseStrategy;
 import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.NotifyIntegrationService;
@@ -22,6 +25,9 @@ import static uk.gov.companieshouse.chs.notification.kafka.consumer.ChsNotificat
 
 @Service
 class KafkaConsumerService {
+
+    @Value( "${kafka.max-attempts}" )
+    private Integer kafkaMaxAttempts;
 
     private static final Logger LOG = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
@@ -55,7 +61,9 @@ class KafkaConsumerService {
             groupId = "${kafka.group-id.email}",
             containerFactory = "listenerContainerFactoryEmail"
     )
-    public void consumeEmailMessage(ConsumerRecord<String, ChsEmailNotification> consumerRecord,
+    public void consumeEmailMessage(
+            final @Header( name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS, required = false ) Integer attemptNumber,
+            ConsumerRecord<String, ChsEmailNotification> consumerRecord,
             Acknowledgment acknowledgment) {
 
         try {
@@ -75,7 +83,11 @@ class KafkaConsumerService {
             final var emailRequest = messageMapper.mapToEmailDetailsRequest(emailNotification);
             notifyIntegrationService.sendEmailMessageToIntegrationApi(emailRequest)
                     .block(Duration.ofSeconds(20L));
+            acknowledgment.acknowledge();
         } catch ( Exception exception ){
+            if ( kafkaMaxAttempts.equals( attemptNumber ) ){
+                acknowledgment.acknowledge();
+            }
             LOG.error( "Error encountered in Email Consumer: ", exception );
             throw exception;
         }
@@ -100,8 +112,11 @@ class KafkaConsumerService {
             groupId = "${kafka.group-id.letter}",
             containerFactory = "listenerContainerFactoryLetter"
     )
-    public void consumeLetterMessage(ConsumerRecord<String, ChsLetterNotification> consumerRecord,
+    public void consumeLetterMessage(
+            final @Header( name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS, required = false ) Integer attemptNumber,
+            ConsumerRecord<String, ChsLetterNotification> consumerRecord,
             Acknowledgment acknowledgment) {
+
 
         try {
 
@@ -120,7 +135,13 @@ class KafkaConsumerService {
             final var letterRequest = messageMapper.mapToLetterDetailsRequest(letterNotification);
             notifyIntegrationService.sendLetterMessageToIntegrationApi(letterRequest)
                     .block( Duration.ofSeconds( 20L ) );
+
+            acknowledgment.acknowledge();
         } catch ( Exception exception ){
+            if ( kafkaMaxAttempts.equals( attemptNumber ) ){
+                acknowledgment.acknowledge();
+            }
+
             LOG.error( "Error encountered in Letter Consumer: ", exception );
             throw exception;
         }
