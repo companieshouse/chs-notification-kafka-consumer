@@ -82,7 +82,7 @@ class KafkaConsumerService {
 
             final var emailRequest = messageMapper.mapToEmailDetailsRequest(emailNotification);
             notifyIntegrationService.sendEmailMessageToIntegrationApi(emailRequest)
-                    .block(Duration.ofSeconds(20L));
+                    .block(Duration.ofMinutes( 3L ));
             acknowledgment.acknowledge();
         } catch ( Exception exception ){
             if ( kafkaMaxAttempts.equals( attemptNumber ) ){
@@ -134,7 +134,7 @@ class KafkaConsumerService {
                     logMapBuilder.build().getLogMap());
             final var letterRequest = messageMapper.mapToLetterDetailsRequest(letterNotification);
             notifyIntegrationService.sendLetterMessageToIntegrationApi(letterRequest)
-                    .block( Duration.ofSeconds( 20L ) );
+                    .block( Duration.ofMinutes( 3L ) );
 
             acknowledgment.acknowledge();
         } catch ( Exception exception ){
