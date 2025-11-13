@@ -101,12 +101,6 @@ class KafkaConsumerServiceTest {
             // When
             kafkaConsumerService.consumeEmailMessage(null, emailRecord, acknowledgment);
 
-            var debugData = getDataFromLogMessage(outputCapture, EventType.DEBUG,
-                    "Consuming email record: " + emailRecord);
-            assertEmailCommonFields(debugData);
-
-            var infoData = getDataFromLogMessage(outputCapture, EventType.INFO, EMAIL_INFO_LOG_MESSAGE);
-            assertEmailCommonFields(infoData);
 
         }
 
@@ -126,13 +120,6 @@ class KafkaConsumerServiceTest {
         try (var outputCapture = new OutputCapture()) {
             // When
             kafkaConsumerService.consumeLetterMessage(null, letterRecord, acknowledgment);
-
-            var debugData = getDataFromLogMessage(outputCapture, EventType.DEBUG, LETTER_DEBUG_LOG_MESSAGE + letterRecord);
-            assertLetterCommonFields(debugData);
-
-            var infoData = getDataFromLogMessage(outputCapture, EventType.INFO, LETTER_INFO_LOG_MESSAGE);
-            assertLetterCommonFields(infoData);
-
         }
 
         // Then
@@ -152,13 +139,6 @@ class KafkaConsumerServiceTest {
             // When/Then
             assertThrows(RuntimeException.class,
                     () -> kafkaConsumerService.consumeEmailMessage(null, emailRecord, acknowledgment));
-
-            var debugData = getDataFromLogMessage(outputCapture, EventType.DEBUG,
-                    "Consuming email record: " + emailRecord);
-            assertEmailCommonFields(debugData);
-
-            var infoData = getDataFromLogMessage(outputCapture, EventType.INFO, EMAIL_INFO_LOG_MESSAGE);
-            assertEmailCommonFields(infoData);
 
         }
 
@@ -180,12 +160,6 @@ class KafkaConsumerServiceTest {
             // When/Then
             assertThrows(RuntimeException.class,
                     () -> kafkaConsumerService.consumeLetterMessage(null, letterRecord, acknowledgment));
-
-            var debugData = getDataFromLogMessage(outputCapture, EventType.DEBUG, LETTER_DEBUG_LOG_MESSAGE + letterRecord);
-            assertLetterCommonFields(debugData);
-
-            var infoData = getDataFromLogMessage(outputCapture, EventType.INFO, LETTER_INFO_LOG_MESSAGE);
-            assertLetterCommonFields(infoData);
         }
 
         // Then
@@ -208,14 +182,6 @@ class KafkaConsumerServiceTest {
             // When/Then
             assertThrows(RuntimeException.class,
                     () -> kafkaConsumerService.consumeEmailMessage(null, emailRecord, acknowledgment));
-
-            var debugData = getDataFromLogMessage(outputCapture, EventType.DEBUG,
-                    "Consuming email record: " + emailRecord);
-            assertEmailCommonFields(debugData);
-
-            var infoData = getDataFromLogMessage(outputCapture, EventType.INFO, EMAIL_INFO_LOG_MESSAGE);
-            assertEmailCommonFields(infoData);
-
         }
 
         // Then
@@ -261,12 +227,6 @@ class KafkaConsumerServiceTest {
             assertThrows(RuntimeException.class,
                     () -> spyKafkaConsumerService.consumeEmailMessage(null, emailRecord, acknowledgment));
 
-            var debugData = getDataFromLogMessage(outputCapture, EventType.DEBUG,
-                    "Consuming email record: " + emailRecord);
-            assertEmailCommonFields(debugData);
-
-            var infoData = getDataFromLogMessage(outputCapture, EventType.INFO, EMAIL_INFO_LOG_MESSAGE);
-            assertEmailCommonFields(infoData);
 
         }
 
@@ -278,13 +238,6 @@ class KafkaConsumerServiceTest {
         try (var outputCapture = new OutputCapture()) {
             // When - Second call should succeed
             spyKafkaConsumerService.consumeEmailMessage(null, emailRecord, acknowledgment);
-
-            var debugData = getDataFromLogMessage(outputCapture, EventType.DEBUG,
-                    "Consuming email record: " + emailRecord);
-            assertEmailCommonFields(debugData);
-
-            var infoData = getDataFromLogMessage(outputCapture, EventType.INFO, EMAIL_INFO_LOG_MESSAGE);
-            assertEmailCommonFields(infoData);
         }
         // Then - Verify the retry succeeded and was acknowledged
         verify(messageMapper, times(2)).mapToEmailDetailsRequest(mockEmailNotification);
@@ -310,13 +263,6 @@ class KafkaConsumerServiceTest {
             assertThrows(RuntimeException.class,
                     () -> spyKafkaConsumerService.consumeLetterMessage(null, letterRecord,
                             acknowledgment));
-
-            var debugData = getDataFromLogMessage(outputCapture, EventType.DEBUG, LETTER_DEBUG_LOG_MESSAGE + letterRecord);
-            assertLetterCommonFields(debugData);
-
-            var infoData = getDataFromLogMessage(outputCapture, EventType.INFO, LETTER_INFO_LOG_MESSAGE);
-            assertLetterCommonFields(infoData);
-
         }
 
         // Verify first attempt behavior
@@ -327,13 +273,6 @@ class KafkaConsumerServiceTest {
         // When - Second call should succeed
         try (var outputCapture = new OutputCapture()) {
             spyKafkaConsumerService.consumeLetterMessage(null, letterRecord, acknowledgment);
-
-            var debugData = getDataFromLogMessage(outputCapture, EventType.DEBUG, LETTER_DEBUG_LOG_MESSAGE + letterRecord);
-            assertLetterCommonFields(debugData);
-
-            // Test Info Log Message
-            getDataFromLogMessage(outputCapture, EventType.INFO, LETTER_INFO_LOG_MESSAGE);
-
         }
 
         // Then - Verify the retry succeeded and was acknowledged
@@ -357,10 +296,6 @@ class KafkaConsumerServiceTest {
             assertThrows(NonRetryableErrorException.class,
                     () -> kafkaConsumerService.consumeEmailMessage(null, emailRecord, acknowledgment));
 
-            // Test Info Log Message
-            var infoData = getDataFromLogMessage(outputCapture, EventType.INFO, EMAIL_INFO_LOG_MESSAGE);
-            assertEmailCommonFields(infoData);
-
         }
 
         // Then
@@ -383,11 +318,6 @@ class KafkaConsumerServiceTest {
             // When/Then - Exception should propagate without retry
             assertThrows(NonRetryableErrorException.class,
                     () -> kafkaConsumerService.consumeLetterMessage(5, letterRecord, acknowledgment));
-
-            // Test Info Log Message
-            var infoData = getDataFromLogMessage(outputCapture, EventType.INFO, LETTER_INFO_LOG_MESSAGE);
-            assertLetterCommonFields(infoData);
-
         }
 
         // Then

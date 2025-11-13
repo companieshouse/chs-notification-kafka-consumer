@@ -13,13 +13,14 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.NotifyIntegrationService;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.translator.MessageMapper;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
-import uk.gov.companieshouse.logging.util.DataMap;
 import uk.gov.companieshouse.notification.ChsEmailNotification;
 import uk.gov.companieshouse.notification.ChsLetterNotification;
+import java.util.UUID;
 
 import static uk.gov.companieshouse.chs.notification.kafka.consumer.ChsNotificationKafkaConsumerApplication.APPLICATION_NAMESPACE;
 
@@ -61,32 +62,27 @@ class KafkaConsumerService {
             groupId = "${kafka.group-id.email}",
             containerFactory = "listenerContainerFactoryEmail"
     )
-    public void consumeEmailMessage(
-            final @Header( name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS, required = false ) Integer attemptNumber,
-            ConsumerRecord<String, ChsEmailNotification> consumerRecord,
-            Acknowledgment acknowledgment) {
-
+    public void consumeEmailMessage( final @Header( name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS, required = false ) Integer attemptNumber, final ConsumerRecord<String, ChsEmailNotification> consumerRecord, final Acknowledgment acknowledgment ) {
+        final var xRequestId = UUID.randomUUID().toString().substring( 0, 32 );
         try {
-            var logMapBuilder = new DataMap.Builder()
-                    .topic(consumerRecord.topic())
-                    .partition(consumerRecord.partition())
-                    .offset(consumerRecord.offset())
-                    .kafkaMessage(consumerRecord.value().toString());
+            final var emailNotification = consumerRecord.value();
+            LOG.infoContext( xRequestId, String.format( "Email consumer received message. Topic: %s, Partition: %d, Offset: %d, Reference: %s, Payload: %s", consumerRecord.topic(), consumerRecord.partition(), consumerRecord.offset(), emailNotification.getSenderDetails().getReference(), consumerRecord.value().toString() ), null );
 
-            LOG.debug("Consuming email record: " + consumerRecord,
-                    logMapBuilder.build().getLogMap());
-            var emailNotification = consumerRecord.value();
-            LOG.info("Consuming email record with sender reference: "
-                            + emailNotification.getSenderDetails().getReference(),
-                    logMapBuilder.build().getLogMap());
-
-            final var emailRequest = messageMapper.mapToEmailDetailsRequest(emailNotification);
-            notifyIntegrationService.sendEmailMessageToIntegrationApi(emailRequest)
+            Mono.just( emailNotification )
+                    .doOnNext( letter -> LOG.debugContext( xRequestId, "Attempting to map email", null ) )
+                    .map( messageMapper::mapToEmailDetailsRequest )
+                    .doOnNext( letter -> LOG.debugContext( xRequestId, "Attempting to send email", null ) )
+                    .flatMap( notifyIntegrationService::sendEmailMessageToIntegrationApi )
+                    .doOnNext( letter -> LOG.debugContext( xRequestId, "Successfully sent email", null ) )
                     .block(Duration.ofSeconds(20L));
+
             acknowledgment.acknowledge();
+            LOG.infoContext( xRequestId, "Acknowledged", null );
         } catch ( Exception exception ){
+            LOG.errorContext( xRequestId, exception, null );
             if ( kafkaMaxAttempts.equals( attemptNumber ) ){
                 acknowledgment.acknowledge();
+                LOG.infoContext( xRequestId, "Acknowledged", null );
             }
             LOG.error( "Error encountered in Email Consumer: ", exception );
             throw exception;
@@ -112,37 +108,28 @@ class KafkaConsumerService {
             groupId = "${kafka.group-id.letter}",
             containerFactory = "listenerContainerFactoryLetter"
     )
-    public void consumeLetterMessage(
-            final @Header( name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS, required = false ) Integer attemptNumber,
-            ConsumerRecord<String, ChsLetterNotification> consumerRecord,
-            Acknowledgment acknowledgment) {
-
-
+    public void consumeLetterMessage( final @Header( name = RetryTopicHeaders.DEFAULT_HEADER_ATTEMPTS, required = false ) Integer attemptNumber, final ConsumerRecord<String, ChsLetterNotification> consumerRecord, final Acknowledgment acknowledgment ) {
+        final var xRequestId = UUID.randomUUID().toString().substring( 0, 32 );
         try {
+            final var letterNotification = consumerRecord.value();
+            LOG.infoContext( xRequestId, String.format( "Letter consumer received message. Topic: %s, Partition: %d, Offset: %d, Reference: %s, Payload: %s", consumerRecord.topic(), consumerRecord.partition(), consumerRecord.offset(), letterNotification.getSenderDetails().getReference(), consumerRecord.value().toString() ), null );
 
-            var logMapBuilder = new DataMap.Builder()
-                    .topic(consumerRecord.topic())
-                    .partition(consumerRecord.partition())
-                    .offset(consumerRecord.offset())
-                    .kafkaMessage(consumerRecord.value().toString());
-
-            LOG.debug("Consuming letter record: " + consumerRecord,
-                    logMapBuilder.build().getLogMap());
-            var letterNotification = consumerRecord.value();
-            LOG.info("Consuming letter record with sender reference: "
-                            + letterNotification.getSenderDetails().getReference(),
-                    logMapBuilder.build().getLogMap());
-            final var letterRequest = messageMapper.mapToLetterDetailsRequest(letterNotification);
-            notifyIntegrationService.sendLetterMessageToIntegrationApi(letterRequest)
+            Mono.just( letterNotification )
+                    .doOnNext( letter -> LOG.debugContext( xRequestId, "Attempting to map letter", null ) )
+                    .map( messageMapper::mapToLetterDetailsRequest )
+                    .doOnNext( letter -> LOG.debugContext( xRequestId, "Attempting to send letter", null ) )
+                    .flatMap( notifyIntegrationService::sendLetterMessageToIntegrationApi )
+                    .doOnNext( letter -> LOG.debugContext( xRequestId, "Successfully sent letter", null ) )
                     .block( Duration.ofSeconds( 20L ) );
 
             acknowledgment.acknowledge();
+            LOG.infoContext( xRequestId, "Acknowledged", null );
         } catch ( Exception exception ){
+            LOG.errorContext( xRequestId, exception, null );
             if ( kafkaMaxAttempts.equals( attemptNumber ) ){
                 acknowledgment.acknowledge();
+                LOG.infoContext( xRequestId, "Acknowledged", null );
             }
-
-            LOG.error( "Error encountered in Letter Consumer: ", exception );
             throw exception;
         }
 
