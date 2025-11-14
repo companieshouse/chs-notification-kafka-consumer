@@ -17,10 +17,12 @@ startup_eventbridge_scheduler_cron        = "cron(15 00 ? * MON-FRI)"
 shutdown_eventbridge_scheduler_cron       = "cron(45 00 ? * MON-FRI)"
 
 # auto scaling
+service_autoscale_enabled  = true
+service_autoscale_target_value_cpu = 60
 
-desired_task_count=3
-max_task_count=6
-min_task_count=2
+desired_task_count=5
+max_task_count=10
+min_task_count=5
 
 
 
