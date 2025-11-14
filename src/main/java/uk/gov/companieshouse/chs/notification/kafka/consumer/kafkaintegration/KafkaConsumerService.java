@@ -85,6 +85,7 @@ class KafkaConsumerService {
                     .block(Duration.ofMinutes( 3L ));
         } catch ( Exception exception ){
             LOG.error( "Error encountered in Email Consumer: ", exception );
+            throw exception;
         } finally {
             acknowledgment.acknowledge();
         }
@@ -135,6 +136,7 @@ class KafkaConsumerService {
 
         } catch ( Exception exception ){
             LOG.error( "Error encountered in Letter Consumer: ", exception );
+            throw exception;
         } finally {
             acknowledgment.acknowledge();
         }
