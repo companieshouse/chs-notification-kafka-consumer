@@ -165,7 +165,6 @@ class KafkaConsumerServiceTest {
         // Then
         verify(messageMapper).mapToEmailDetailsRequest(mockEmailNotification);
         verifyNoInteractions(notifyIntegrationService);
-        verifyNoInteractions(acknowledgment);
     }
 
     @Test
@@ -191,7 +190,6 @@ class KafkaConsumerServiceTest {
         // Then
         verify(messageMapper).mapToLetterDetailsRequest(mockLetterNotification);
         verifyNoInteractions(notifyIntegrationService);
-        verifyNoInteractions(acknowledgment);
     }
 
     @Test
@@ -221,7 +219,6 @@ class KafkaConsumerServiceTest {
         // Then
         verify(messageMapper).mapToEmailDetailsRequest(mockEmailNotification);
         verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(mockEmailRequest);
-        verifyNoInteractions(acknowledgment);
     }
 
     @Test
@@ -240,7 +237,6 @@ class KafkaConsumerServiceTest {
         // Then
         verify(messageMapper).mapToLetterDetailsRequest(mockLetterNotification);
         verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest);
-        verifyNoInteractions(acknowledgment);
     }
 
     @Test
@@ -273,7 +269,6 @@ class KafkaConsumerServiceTest {
         // Verify first attempt behavior
         verify(messageMapper).mapToEmailDetailsRequest(mockEmailNotification);
         verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(mockEmailRequest);
-        verifyNoInteractions(acknowledgment);
 
         try (var outputCapture = new OutputCapture()) {
             // When - Second call should succeed
@@ -366,7 +361,6 @@ class KafkaConsumerServiceTest {
         // Then
         verify(messageMapper).mapToEmailDetailsRequest(mockEmailNotification);
         verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(mockEmailRequest);
-        verifyNoInteractions(acknowledgment);
     }
 
     @Test

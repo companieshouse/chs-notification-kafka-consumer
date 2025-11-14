@@ -83,13 +83,11 @@ class KafkaConsumerService {
             final var emailRequest = messageMapper.mapToEmailDetailsRequest(emailNotification);
             notifyIntegrationService.sendEmailMessageToIntegrationApi(emailRequest)
                     .block(Duration.ofMinutes( 3L ));
-            acknowledgment.acknowledge();
         } catch ( Exception exception ){
-            if ( kafkaMaxAttempts.equals( attemptNumber ) ){
-                acknowledgment.acknowledge();
-            }
             LOG.error( "Error encountered in Email Consumer: ", exception );
             throw exception;
+        } finally {
+            acknowledgment.acknowledge();
         }
     }
 
@@ -136,14 +134,11 @@ class KafkaConsumerService {
             notifyIntegrationService.sendLetterMessageToIntegrationApi(letterRequest)
                     .block( Duration.ofMinutes( 3L ) );
 
-            acknowledgment.acknowledge();
         } catch ( Exception exception ){
-            if ( kafkaMaxAttempts.equals( attemptNumber ) ){
-                acknowledgment.acknowledge();
-            }
-
             LOG.error( "Error encountered in Letter Consumer: ", exception );
             throw exception;
+        } finally {
+            acknowledgment.acknowledge();
         }
 
     }
