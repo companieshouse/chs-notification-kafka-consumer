@@ -59,7 +59,7 @@ public class KafkaConfig {
            Premature expiration leads Kafka to believe to the consumer has failed when it hasn't. So it
            will incorrectly retry.
 
-           TODO: we need to extract these into application.properties
+           We need to extract these into application.properties
         */
 
 
