@@ -50,6 +50,19 @@ public class KafkaConfig {
         consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         consumerProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         consumerProps.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
+        consumerProps.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, 300000 );
+        consumerProps.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, 350000 );
+        consumerProps.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, 5000 );
+
+        /* SESSION_TIMEOUT_MS_CONFIG, MAX_POLL_INTERVAL_MS_CONFIG, HEARTBEAT_INTERVAL_MS_CONFIG
+           These configs were added to alleviate a problem where the session was prematurely expiring.
+           Premature expiration leads Kafka to believe to the consumer has failed when it hasn't. So it
+           will incorrectly retry.
+
+           TODO: we need to extract these into application.properties
+        */
+
+
     }
 
     @Bean
