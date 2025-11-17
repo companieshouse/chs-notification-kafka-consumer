@@ -97,11 +97,6 @@ class KafkaConsumerService {
         }
     }
 
-    // TODO: finish logging in this consumer
-    // TODO: tell rakesh about the cron job
-    // TODO: update the release notes with 10 for the partitions
-    // TODO: push to staging
-
     /**
      * Receives chs-notification-letter topic messages. <br> retries on
      * chs-notification-letter-retry. <br> sends error messages to chs-notification-email-error
