@@ -13,6 +13,7 @@ import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.NotifyIntegrationService;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.translator.MessageMapper;
 import uk.gov.companieshouse.logging.Logger;
@@ -21,6 +22,7 @@ import uk.gov.companieshouse.logging.util.DataMap;
 import uk.gov.companieshouse.notification.ChsEmailNotification;
 import uk.gov.companieshouse.notification.ChsLetterNotification;
 
+import static java.time.Instant.now;
 import static uk.gov.companieshouse.chs.notification.kafka.consumer.ChsNotificationKafkaConsumerApplication.APPLICATION_NAMESPACE;
 
 @Service
@@ -66,6 +68,7 @@ class KafkaConsumerService {
             ConsumerRecord<String, ChsEmailNotification> consumerRecord,
             Acknowledgment acknowledgment) {
 
+        final var xRequestId = String.valueOf( now().getEpochSecond() );
         try {
             var logMapBuilder = new DataMap.Builder()
                     .topic(consumerRecord.topic())
@@ -73,15 +76,18 @@ class KafkaConsumerService {
                     .offset(consumerRecord.offset())
                     .kafkaMessage(consumerRecord.value().toString());
 
-            LOG.debug("Consuming email record: " + consumerRecord,
-                    logMapBuilder.build().getLogMap());
-            var emailNotification = consumerRecord.value();
-            LOG.info("Consuming email record with sender reference: "
-                            + emailNotification.getSenderDetails().getReference(),
-                    logMapBuilder.build().getLogMap());
+            LOG.debugContext(xRequestId, "Consuming email record: " + consumerRecord, logMapBuilder.build().getLogMap());
 
-            final var emailRequest = messageMapper.mapToEmailDetailsRequest(emailNotification);
-            notifyIntegrationService.sendEmailMessageToIntegrationApi(emailRequest)
+            final var emailNotification = consumerRecord.value();
+            final var reference = emailNotification.getSenderDetails().getReference();
+
+            LOG.debugContext(xRequestId, "Consuming email record with sender reference: " + reference, null);
+            Mono.just( emailNotification )
+                    .doOnNext( notification -> LOG.debugContext( xRequestId, "Mapping email data", null ) )
+                    .map( messageMapper::mapToEmailDetailsRequest )
+                    .doOnNext( notification -> LOG.debugContext( xRequestId, "Sending email to chs-gov-uk-integration-api", null ) )
+                    .flatMap( notifyIntegrationService::sendEmailMessageToIntegrationApi )
+                    .doOnSuccess( event -> LOG.infoContext( xRequestId, "Successfully completed response to chs-gov-uk-integration-api", null ) )
                     .block(Duration.ofMinutes( 3L ));
         } catch ( Exception exception ){
             LOG.error( "Error encountered in Email Consumer: ", exception );
@@ -90,6 +96,11 @@ class KafkaConsumerService {
             acknowledgment.acknowledge();
         }
     }
+
+    // TODO: finish logging in this consumer
+    // TODO: tell rakesh about the cron job
+    // TODO: update the release notes with 10 for the partitions
+    // TODO: push to staging
 
     /**
      * Receives chs-notification-letter topic messages. <br> retries on
@@ -115,25 +126,27 @@ class KafkaConsumerService {
             ConsumerRecord<String, ChsLetterNotification> consumerRecord,
             Acknowledgment acknowledgment) {
 
-
+        final var xRequestId = String.valueOf( now().getEpochSecond() );
         try {
-
             var logMapBuilder = new DataMap.Builder()
                     .topic(consumerRecord.topic())
                     .partition(consumerRecord.partition())
                     .offset(consumerRecord.offset())
                     .kafkaMessage(consumerRecord.value().toString());
 
-            LOG.debug("Consuming letter record: " + consumerRecord,
-                    logMapBuilder.build().getLogMap());
-            var letterNotification = consumerRecord.value();
-            LOG.info("Consuming letter record with sender reference: "
-                            + letterNotification.getSenderDetails().getReference(),
-                    logMapBuilder.build().getLogMap());
-            final var letterRequest = messageMapper.mapToLetterDetailsRequest(letterNotification);
-            notifyIntegrationService.sendLetterMessageToIntegrationApi(letterRequest)
-                    .block( Duration.ofMinutes( 3L ) );
+            LOG.debugContext(xRequestId, "Consuming letter record: " + consumerRecord, logMapBuilder.build().getLogMap());
 
+            final var letterNotification = consumerRecord.value();
+            final var reference = letterNotification.getSenderDetails().getReference();
+
+            LOG.debugContext(xRequestId, "Consuming letter record with sender reference: " + reference, null);
+            Mono.just( letterNotification )
+                    .doOnNext( notification -> LOG.debugContext( xRequestId, "Mapping letter data", null ) )
+                    .map( messageMapper::mapToLetterDetailsRequest )
+                    .doOnNext( notification -> LOG.debugContext( xRequestId, "Sending letter to chs-gov-uk-integration-api", null ) )
+                    .flatMap( notifyIntegrationService::sendLetterMessageToIntegrationApi )
+                    .doOnSuccess( event -> LOG.infoContext( xRequestId, "Successfully completed response to chs-gov-uk-integration-api", null ) )
+                    .block( Duration.ofMinutes( 3L ) );
         } catch ( Exception exception ){
             LOG.error( "Error encountered in Letter Consumer: ", exception );
             throw exception;
