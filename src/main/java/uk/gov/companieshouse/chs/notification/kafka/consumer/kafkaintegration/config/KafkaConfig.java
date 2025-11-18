@@ -38,7 +38,7 @@ public class KafkaConfig {
                        @Value("${kafka.session.timeout}" ) int sessionTimeout,
                        @Value("${kafka.max.poll.interval}") int maxPollInterval,
                        @Value("${kafka.heartbeat.interval}") int heartbeatInterval,
-                       @Value("$kafka.max.poll.records") int maxPollRecords){
+                       @Value("${kafka.max.poll.records}") int maxPollRecords){
         this.emailDeserializer = emailDeserializer;
         this.letterDeserializer = letterDeserializer;
 
