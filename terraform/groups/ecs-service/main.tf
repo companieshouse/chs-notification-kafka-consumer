@@ -192,4 +192,3 @@ module "ecs-service-kafka-letter-error" {
   use_set_environment_files = local.use_set_environment_files
 
 }
-
