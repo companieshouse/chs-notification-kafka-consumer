@@ -18,7 +18,7 @@ import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.kafka.listener.ContainerProperties;
+import org.springframework.kafka.listener.ContainerProperties.AckMode;
 import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import uk.gov.companieshouse.notification.ChsEmailNotification;
 import uk.gov.companieshouse.notification.ChsLetterNotification;
@@ -34,7 +34,11 @@ public class KafkaConfig {
     @Autowired
     public KafkaConfig(AvroDeserializer<ChsEmailNotification> emailDeserializer,
                        AvroDeserializer<ChsLetterNotification> letterDeserializer,
-                       @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers) {
+                       @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
+                       @Value("${kafka.session.timeout}" ) int sessionTimeout,
+                       @Value("${kafka.max.poll.interval}") int maxPollInterval,
+                       @Value("${kafka.heartbeat.interval}") int heartbeatInterval,
+                       @Value("${kafka.max.poll.records}") int maxPollRecords){
         this.emailDeserializer = emailDeserializer;
         this.letterDeserializer = letterDeserializer;
 
@@ -50,6 +54,18 @@ public class KafkaConfig {
         consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         consumerProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         consumerProps.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
+        consumerProps.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, sessionTimeout );
+        consumerProps.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, maxPollInterval );
+        consumerProps.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, heartbeatInterval );
+        consumerProps.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords);
+
+        /* SESSION_TIMEOUT_MS_CONFIG, MAX_POLL_INTERVAL_MS_CONFIG, HEARTBEAT_INTERVAL_MS_CONFIG, MAX_POLL_RECORDS_CONFIG
+           These configs were added to alleviate a problem where the session was prematurely expiring.
+           Premature expiration leads Kafka to believe to the consumer has failed when it hasn't. So it
+           will incorrectly retry.
+        */
+
+
     }
 
     @Bean
@@ -62,7 +78,7 @@ public class KafkaConfig {
         ConcurrentKafkaListenerContainerFactory<String, ChsEmailNotification> factory =
                 new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(new DefaultKafkaConsumerFactory<>(consumerProps, new StringDeserializer(), emailDeserializer));
-        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
         return factory;
     }
 
@@ -75,7 +91,7 @@ public class KafkaConfig {
     public ConcurrentKafkaListenerContainerFactory<String, ChsLetterNotification> listenerContainerFactoryLetter() {
         ConcurrentKafkaListenerContainerFactory<String, ChsLetterNotification> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(new DefaultKafkaConsumerFactory<>(consumerProps, new StringDeserializer(), letterDeserializer));
-        factory.getContainerProperties().setAckMode(ContainerProperties.AckMode.MANUAL);
+        factory.getContainerProperties().setAckMode(AckMode.MANUAL_IMMEDIATE);
         return factory;
     }
 }
