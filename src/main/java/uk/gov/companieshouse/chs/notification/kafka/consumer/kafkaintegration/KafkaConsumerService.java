@@ -86,7 +86,9 @@ class KafkaConsumerService {
                     .doOnNext( notification -> LOG.debugContext( xRequestId, "Mapping email data", null ) )
                     .map( messageMapper::mapToEmailDetailsRequest )
                     .doOnNext( notification -> LOG.debugContext( xRequestId, "Sending email to chs-gov-uk-integration-api", null ) )
-                    .flatMap( notifyIntegrationService::sendEmailMessageToIntegrationApi )
+                    .flatMap( govUkEmailDetailsRequest ->
+                            notifyIntegrationService.sendEmailMessageToIntegrationApi(
+                                    govUkEmailDetailsRequest, xRequestId ) )
                     .doOnSuccess( event -> LOG.infoContext( xRequestId, "Successfully completed response to chs-gov-uk-integration-api", null ) )
                     .block(Duration.ofMinutes( 3L ));
         } catch ( Exception exception ){
@@ -139,7 +141,9 @@ class KafkaConsumerService {
                     .doOnNext( notification -> LOG.debugContext( xRequestId, "Mapping letter data", null ) )
                     .map( messageMapper::mapToLetterDetailsRequest )
                     .doOnNext( notification -> LOG.debugContext( xRequestId, "Sending letter to chs-gov-uk-integration-api", null ) )
-                    .flatMap( notifyIntegrationService::sendLetterMessageToIntegrationApi )
+                    .flatMap( govUkLetterDetailsRequest ->
+                            notifyIntegrationService.sendLetterMessageToIntegrationApi(
+                                    govUkLetterDetailsRequest, xRequestId) )
                     .doOnSuccess( event -> LOG.infoContext( xRequestId, "Successfully completed response to chs-gov-uk-integration-api", null ) )
                     .block( Duration.ofMinutes( 3L ) );
         } catch ( Exception exception ){
