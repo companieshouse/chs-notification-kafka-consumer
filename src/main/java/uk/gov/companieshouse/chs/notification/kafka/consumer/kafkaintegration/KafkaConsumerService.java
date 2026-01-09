@@ -69,10 +69,9 @@ class KafkaConsumerService {
             ConsumerRecord<String, ChsEmailNotification> consumerRecord,
             Acknowledgment acknowledgment) {
 
-        // TODO DEEP-490 Make sure it's OK if there is no such header.
         final var contextHeader = consumerRecord.headers().lastHeader(X_REQUEST_ID);
         final var contextId = contextHeader != null
-                ? new String(contextHeader.value()) : String.valueOf( now().getEpochSecond() );
+                ? new String(contextHeader.value()) : generateUniqueContextId();
 
         try {
             var logMapBuilder = new DataMap.Builder()
@@ -128,10 +127,9 @@ class KafkaConsumerService {
             ConsumerRecord<String, ChsLetterNotification> consumerRecord,
             Acknowledgment acknowledgment) {
 
-        // TODO DEEP-490 Make sure it's OK if there is no such header.
         final var contextHeader = consumerRecord.headers().lastHeader(X_REQUEST_ID);
         final var contextId = contextHeader != null
-                ? new String(contextHeader.value()) : String.valueOf( now().getEpochSecond() );
+                ? new String(contextHeader.value()) : generateUniqueContextId();
 
         try {
             var logMapBuilder = new DataMap.Builder()
@@ -162,5 +160,9 @@ class KafkaConsumerService {
             acknowledgment.acknowledge();
         }
 
+    }
+
+    protected String generateUniqueContextId() {
+        return String.valueOf(now().getEpochSecond());
     }
 }
