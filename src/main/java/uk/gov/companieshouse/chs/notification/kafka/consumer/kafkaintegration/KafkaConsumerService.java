@@ -22,6 +22,7 @@ import uk.gov.companieshouse.logging.util.DataMap;
 import uk.gov.companieshouse.notification.ChsEmailNotification;
 import uk.gov.companieshouse.notification.ChsLetterNotification;
 
+import static com.google.common.net.HttpHeaders.X_REQUEST_ID;
 import static java.time.Instant.now;
 import static uk.gov.companieshouse.chs.notification.kafka.consumer.ChsNotificationKafkaConsumerApplication.APPLICATION_NAMESPACE;
 
@@ -68,7 +69,10 @@ class KafkaConsumerService {
             ConsumerRecord<String, ChsEmailNotification> consumerRecord,
             Acknowledgment acknowledgment) {
 
-        final var xRequestId = String.valueOf( now().getEpochSecond() );
+        final var contextHeader = consumerRecord.headers().lastHeader(X_REQUEST_ID);
+        final var contextId = contextHeader != null
+                ? new String(contextHeader.value()) : generateUniqueContextId();
+
         try {
             var logMapBuilder = new DataMap.Builder()
                     .topic(consumerRecord.topic())
@@ -76,18 +80,20 @@ class KafkaConsumerService {
                     .offset(consumerRecord.offset())
                     .kafkaMessage(consumerRecord.value().toString());
 
-            LOG.debugContext(xRequestId, "Consuming email record: " + consumerRecord, logMapBuilder.build().getLogMap());
+            LOG.debugContext(contextId, "Consuming email record: " + consumerRecord, logMapBuilder.build().getLogMap());
 
             final var emailNotification = consumerRecord.value();
             final var reference = emailNotification.getSenderDetails().getReference();
 
-            LOG.debugContext(xRequestId, "Consuming email record with sender reference: " + reference, null);
+            LOG.debugContext(contextId, "Consuming email record with sender reference: " + reference, null);
             Mono.just( emailNotification )
-                    .doOnNext( notification -> LOG.debugContext( xRequestId, "Mapping email data", null ) )
+                    .doOnNext( notification -> LOG.debugContext( contextId, "Mapping email data", null ) )
                     .map( messageMapper::mapToEmailDetailsRequest )
-                    .doOnNext( notification -> LOG.debugContext( xRequestId, "Sending email to chs-gov-uk-integration-api", null ) )
-                    .flatMap( notifyIntegrationService::sendEmailMessageToIntegrationApi )
-                    .doOnSuccess( event -> LOG.infoContext( xRequestId, "Successfully completed response to chs-gov-uk-integration-api", null ) )
+                    .doOnNext( notification -> LOG.debugContext( contextId, "Sending email to chs-gov-uk-integration-api", null ) )
+                    .flatMap( govUkEmailDetailsRequest ->
+                            notifyIntegrationService.sendEmailMessageToIntegrationApi(
+                                    govUkEmailDetailsRequest, contextId ) )
+                    .doOnSuccess( event -> LOG.infoContext( contextId, "Successfully completed response to chs-gov-uk-integration-api", null ) )
                     .block(Duration.ofMinutes( 3L ));
         } catch ( Exception exception ){
             LOG.error( "Error encountered in Email Consumer: ", exception );
@@ -121,7 +127,10 @@ class KafkaConsumerService {
             ConsumerRecord<String, ChsLetterNotification> consumerRecord,
             Acknowledgment acknowledgment) {
 
-        final var xRequestId = String.valueOf( now().getEpochSecond() );
+        final var contextHeader = consumerRecord.headers().lastHeader(X_REQUEST_ID);
+        final var contextId = contextHeader != null
+                ? new String(contextHeader.value()) : generateUniqueContextId();
+
         try {
             var logMapBuilder = new DataMap.Builder()
                     .topic(consumerRecord.topic())
@@ -129,18 +138,20 @@ class KafkaConsumerService {
                     .offset(consumerRecord.offset())
                     .kafkaMessage(consumerRecord.value().toString());
 
-            LOG.debugContext(xRequestId, "Consuming letter record: " + consumerRecord, logMapBuilder.build().getLogMap());
+            LOG.debugContext(contextId, "Consuming letter record: " + consumerRecord, logMapBuilder.build().getLogMap());
 
             final var letterNotification = consumerRecord.value();
             final var reference = letterNotification.getSenderDetails().getReference();
 
-            LOG.debugContext(xRequestId, "Consuming letter record with sender reference: " + reference, null);
+            LOG.debugContext(contextId, "Consuming letter record with sender reference: " + reference, null);
             Mono.just( letterNotification )
-                    .doOnNext( notification -> LOG.debugContext( xRequestId, "Mapping letter data", null ) )
+                    .doOnNext( notification -> LOG.debugContext( contextId, "Mapping letter data", null ) )
                     .map( messageMapper::mapToLetterDetailsRequest )
-                    .doOnNext( notification -> LOG.debugContext( xRequestId, "Sending letter to chs-gov-uk-integration-api", null ) )
-                    .flatMap( notifyIntegrationService::sendLetterMessageToIntegrationApi )
-                    .doOnSuccess( event -> LOG.infoContext( xRequestId, "Successfully completed response to chs-gov-uk-integration-api", null ) )
+                    .doOnNext( notification -> LOG.debugContext( contextId, "Sending letter to chs-gov-uk-integration-api", null ) )
+                    .flatMap( govUkLetterDetailsRequest ->
+                            notifyIntegrationService.sendLetterMessageToIntegrationApi(
+                                    govUkLetterDetailsRequest, contextId) )
+                    .doOnSuccess( event -> LOG.infoContext( contextId, "Successfully completed response to chs-gov-uk-integration-api", null ) )
                     .block( Duration.ofMinutes( 3L ) );
         } catch ( Exception exception ){
             LOG.error( "Error encountered in Letter Consumer: ", exception );
@@ -149,5 +160,9 @@ class KafkaConsumerService {
             acknowledgment.acknowledge();
         }
 
+    }
+
+    protected String generateUniqueContextId() {
+        return String.valueOf(now().getEpochSecond());
     }
 }

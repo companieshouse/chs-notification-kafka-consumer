@@ -23,6 +23,7 @@ import static helpers.utils.OutputAssertions.getDataFromLogMessage;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static uk.gov.companieshouse.chs.notification.kafka.consumer.Constants.TOKEN_CONTEXT_ID;
 
 @SpringBootTest
 @Tag("unit-test")
@@ -35,7 +36,8 @@ class ApiIntegrationInterfaceTest {
     @Test
     void When_NullEmailRequest_Expect_ConstraintViolationException() {
         assertThrowsExactly(ConstraintViolationException.class,
-                () -> notifyIntegrationService.sendEmailMessageToIntegrationApi(null),
+                () -> notifyIntegrationService.sendEmailMessageToIntegrationApi(null,
+                        TOKEN_CONTEXT_ID),
                 "Should throw ConstraintViolationException for null email request");
     }
 
@@ -43,14 +45,15 @@ class ApiIntegrationInterfaceTest {
     void When_EmptyEmailRequest_Expect_ConstraintViolationException() {
         assertThrowsExactly(ConstraintViolationException.class,
                 () -> notifyIntegrationService.sendEmailMessageToIntegrationApi(
-                        new GovUkEmailDetailsRequest()),
+                        new GovUkEmailDetailsRequest(), TOKEN_CONTEXT_ID),
                 "Should throw ConstraintViolationException for empty email request");
     }
 
     @Test
     void When_NullLetterRequest_Expect_ConstraintViolationException() {
         assertThrowsExactly(ConstraintViolationException.class,
-                () -> notifyIntegrationService.sendLetterMessageToIntegrationApi(null),
+                () -> notifyIntegrationService.sendLetterMessageToIntegrationApi(null,
+                        TOKEN_CONTEXT_ID),
                 "Should throw ConstraintViolationException for null letter request");
     }
 
@@ -58,7 +61,7 @@ class ApiIntegrationInterfaceTest {
     void When_EmptyLetterRequest_Expect_ConstraintViolationException() {
         assertThrowsExactly(ConstraintViolationException.class,
                 () -> notifyIntegrationService.sendLetterMessageToIntegrationApi(
-                        new GovUkLetterDetailsRequest()),
+                        new GovUkLetterDetailsRequest(), TOKEN_CONTEXT_ID),
                 "Should throw ConstraintViolationException for empty letter request");
     }
 
@@ -75,7 +78,8 @@ class ApiIntegrationInterfaceTest {
         NotifyIntegrationService service = new NotifyIntegrationService(client);
 
         try (var outputCapture = new OutputCapture()) {
-            service.sendEmailMessageToIntegrationApi(new GovUkEmailDetailsRequest())
+            service.sendEmailMessageToIntegrationApi(new GovUkEmailDetailsRequest(),
+                            TOKEN_CONTEXT_ID)
                     .onErrorResume(e -> Mono.empty())
                     .block();
 
@@ -103,7 +107,8 @@ class ApiIntegrationInterfaceTest {
         NotifyIntegrationService service = new NotifyIntegrationService(client);
 
         try (var outputCapture = new OutputCapture()) {
-            service.sendLetterMessageToIntegrationApi(new GovUkLetterDetailsRequest())
+            service.sendLetterMessageToIntegrationApi(new GovUkLetterDetailsRequest(),
+                            TOKEN_CONTEXT_ID)
                     .onErrorResume(e -> Mono.empty())
                     .block();
 
@@ -133,7 +138,8 @@ class ApiIntegrationInterfaceTest {
             NotifyIntegrationService service = new NotifyIntegrationService(client);
 
             assertDoesNotThrow(() ->
-                    service.sendEmailMessageToIntegrationApi(new GovUkEmailDetailsRequest())
+                    service.sendEmailMessageToIntegrationApi(new GovUkEmailDetailsRequest(),
+                                    TOKEN_CONTEXT_ID)
                             .block());
 
             var amountOfErrorLogs = outputCapture.findAmountByEvent(EventType.ERROR);
@@ -158,7 +164,8 @@ class ApiIntegrationInterfaceTest {
             NotifyIntegrationService service = new NotifyIntegrationService(client);
 
             assertDoesNotThrow(() ->
-                    service.sendLetterMessageToIntegrationApi(new GovUkLetterDetailsRequest())
+                    service.sendLetterMessageToIntegrationApi(new GovUkLetterDetailsRequest(),
+                                    TOKEN_CONTEXT_ID)
                             .block());
 
             var amountOfErrorLogs = outputCapture.findAmountByEvent(EventType.ERROR);
