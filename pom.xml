@@ -47,7 +47,7 @@
         <gson.version>2.13.1</gson.version>
         <spring-security-core.version>6.5.4</spring-security-core.version>
         <spring-web.version>6.2.8</spring-web.version>
-        <tomcat-embed.version>11.0.14</tomcat-embed.version>
+        <tomcat-embed.version>11.0.15</tomcat-embed.version>
         <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
         <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
         <sonar.login></sonar.login>
