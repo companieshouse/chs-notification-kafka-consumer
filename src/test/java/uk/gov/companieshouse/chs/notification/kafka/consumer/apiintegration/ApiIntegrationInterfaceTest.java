@@ -1,5 +1,11 @@
 package uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration;
 
+import static helpers.utils.OutputAssertions.assertJsonHasAndEquals;
+import static helpers.utils.OutputAssertions.getDataFromLogMessage;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+
 import helpers.OutputCapture;
 import jakarta.validation.ConstraintViolationException;
 import java.io.IOException;
@@ -14,15 +20,9 @@ import org.springframework.web.reactive.function.client.ExchangeFunction;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
-import uk.gov.companieshouse.api.chs.notification.model.GovUkEmailDetailsRequest;
-import uk.gov.companieshouse.api.chs.notification.model.GovUkLetterDetailsRequest;
+import uk.gov.companieshouse.api.chs.notification.integration.model.EmailRequest;
+import uk.gov.companieshouse.api.chs.notification.integration.model.LetterRequest;
 import uk.gov.companieshouse.logging.EventType;
-
-import static helpers.utils.OutputAssertions.assertJsonHasAndEquals;
-import static helpers.utils.OutputAssertions.getDataFromLogMessage;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
 
 @SpringBootTest
 @Tag("unit-test")
@@ -43,7 +43,7 @@ class ApiIntegrationInterfaceTest {
     void When_EmptyEmailRequest_Expect_ConstraintViolationException() {
         assertThrowsExactly(ConstraintViolationException.class,
                 () -> notifyIntegrationService.sendEmailMessageToIntegrationApi(
-                        new GovUkEmailDetailsRequest()),
+                        new EmailRequest()),
                 "Should throw ConstraintViolationException for empty email request");
     }
 
@@ -58,7 +58,7 @@ class ApiIntegrationInterfaceTest {
     void When_EmptyLetterRequest_Expect_ConstraintViolationException() {
         assertThrowsExactly(ConstraintViolationException.class,
                 () -> notifyIntegrationService.sendLetterMessageToIntegrationApi(
-                        new GovUkLetterDetailsRequest()),
+                        new LetterRequest()),
                 "Should throw ConstraintViolationException for empty letter request");
     }
 
@@ -75,7 +75,7 @@ class ApiIntegrationInterfaceTest {
         NotifyIntegrationService service = new NotifyIntegrationService(client);
 
         try (var outputCapture = new OutputCapture()) {
-            service.sendEmailMessageToIntegrationApi(new GovUkEmailDetailsRequest())
+            service.sendEmailMessageToIntegrationApi(new EmailRequest())
                     .onErrorResume(e -> Mono.empty())
                     .block();
 
@@ -103,7 +103,7 @@ class ApiIntegrationInterfaceTest {
         NotifyIntegrationService service = new NotifyIntegrationService(client);
 
         try (var outputCapture = new OutputCapture()) {
-            service.sendLetterMessageToIntegrationApi(new GovUkLetterDetailsRequest())
+            service.sendLetterMessageToIntegrationApi(new LetterRequest())
                     .onErrorResume(e -> Mono.empty())
                     .block();
 
@@ -133,7 +133,7 @@ class ApiIntegrationInterfaceTest {
             NotifyIntegrationService service = new NotifyIntegrationService(client);
 
             assertDoesNotThrow(() ->
-                    service.sendEmailMessageToIntegrationApi(new GovUkEmailDetailsRequest())
+                    service.sendEmailMessageToIntegrationApi(new EmailRequest())
                             .block());
 
             var amountOfErrorLogs = outputCapture.findAmountByEvent(EventType.ERROR);
@@ -158,7 +158,7 @@ class ApiIntegrationInterfaceTest {
             NotifyIntegrationService service = new NotifyIntegrationService(client);
 
             assertDoesNotThrow(() ->
-                    service.sendLetterMessageToIntegrationApi(new GovUkLetterDetailsRequest())
+                    service.sendLetterMessageToIntegrationApi(new LetterRequest())
                             .block());
 
             var amountOfErrorLogs = outputCapture.findAmountByEvent(EventType.ERROR);

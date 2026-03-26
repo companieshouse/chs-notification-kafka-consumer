@@ -25,3 +25,9 @@ replay_pid*
 /suppress.xml
 target
 .idea
+
+# Eclipse
+.classpath
+.project
+.settings
+

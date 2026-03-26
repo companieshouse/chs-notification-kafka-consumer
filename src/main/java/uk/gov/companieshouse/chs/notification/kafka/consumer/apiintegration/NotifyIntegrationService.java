@@ -10,8 +10,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
-import uk.gov.companieshouse.api.chs.notification.model.GovUkEmailDetailsRequest;
-import uk.gov.companieshouse.api.chs.notification.model.GovUkLetterDetailsRequest;
+import uk.gov.companieshouse.api.chs.notification.integration.model.EmailRequest;
+import uk.gov.companieshouse.api.chs.notification.integration.model.LetterRequest;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.logging.util.DataMap;
@@ -28,12 +28,12 @@ public class NotifyIntegrationService {
     }
 
     public Mono<Void> sendEmailMessageToIntegrationApi(
-            @NotNull @Valid final GovUkEmailDetailsRequest govUkEmailDetailsRequest) {
+            @NotNull @Valid final EmailRequest request) {
 
         return notifyIntegrationWebClient.post()
                 .uri("/email")
                 .header("Content-Type", "application/json")
-                .bodyValue(govUkEmailDetailsRequest)
+                .bodyValue(request)
                 .retrieve()
                 .toBodilessEntity()
                 .doOnError(WebClientResponseException.class, err -> {
@@ -48,11 +48,11 @@ public class NotifyIntegrationService {
     }
 
     public Mono<Void> sendLetterMessageToIntegrationApi(
-            @NotNull @Valid final GovUkLetterDetailsRequest govUkLetterDetailsRequest) {
+            @NotNull @Valid final LetterRequest request) {
         return notifyIntegrationWebClient.post()
                 .uri("/letter")
                 .header("Content-Type", "application/json")
-                .bodyValue(govUkLetterDetailsRequest)
+                .bodyValue(request)
                 .retrieve()
                 .toBodilessEntity()
                 .doOnError(WebClientResponseException.class, err -> {
