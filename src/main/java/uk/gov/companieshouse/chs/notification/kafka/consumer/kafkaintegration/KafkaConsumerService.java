@@ -14,9 +14,8 @@ import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
-import uk.gov.companieshouse.api.chs.notification.integration.model.EmailRequest;
-import uk.gov.companieshouse.api.chs.notification.integration.model.LetterRequest;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.NotifyIntegrationService;
+import uk.gov.companieshouse.chs.notification.kafka.consumer.translator.MessageMapper;
 import uk.gov.companieshouse.logging.Logger;
 import uk.gov.companieshouse.logging.LoggerFactory;
 import uk.gov.companieshouse.logging.util.DataMap;
@@ -35,11 +34,14 @@ class KafkaConsumerService {
     private static final Logger LOG = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
     private final NotifyIntegrationService notifyIntegrationService;
+    private final MessageMapper messageMapper;
 
     public KafkaConsumerService(
-            final NotifyIntegrationService apiIntegrationInterface
+            final NotifyIntegrationService apiIntegrationInterface,
+            final MessageMapper messageMapper
     ) {
         this.notifyIntegrationService = apiIntegrationInterface;
+        this.messageMapper = messageMapper;
     }
 
     /**
@@ -77,12 +79,12 @@ class KafkaConsumerService {
             LOG.debugContext(xRequestId, "Consuming email record: " + consumerRecord, logMapBuilder.build().getLogMap());
 
             final var emailNotification = consumerRecord.value();
-            final var reference = emailNotification.getSenderDetails().getReference();
+            final var reference = emailNotification.getReference();
 
             LOG.debugContext(xRequestId, "Consuming email record with sender reference: " + reference, null);
             Mono.just( emailNotification )
                     .doOnNext( notification -> LOG.debugContext( xRequestId, "Mapping email data", null ) )
-                    .map( r -> new EmailRequest(r.getSenderDetails().getAppId(), r.getSenderDetails().getReference()) )
+                    .map( messageMapper::mapToEmailRequest )
                     .doOnNext( notification -> LOG.debugContext( xRequestId, "Sending email to chs-gov-uk-integration-api", null ) )
                     .flatMap( notifyIntegrationService::sendEmailMessageToIntegrationApi )
                     .doOnSuccess( event -> LOG.infoContext( xRequestId, "Successfully completed response to chs-gov-uk-integration-api", null ) )
@@ -130,12 +132,12 @@ class KafkaConsumerService {
             LOG.debugContext(xRequestId, "Consuming letter record: " + consumerRecord, logMapBuilder.build().getLogMap());
 
             final var letterNotification = consumerRecord.value();
-            final var reference = letterNotification.getSenderDetails().getReference();
+            final var reference = letterNotification.getReference();
 
             LOG.debugContext(xRequestId, "Consuming letter record with sender reference: " + reference, null);
             Mono.just( letterNotification )
                     .doOnNext( notification -> LOG.debugContext( xRequestId, "Mapping letter data", null ) )
-                    .map( r -> new LetterRequest(r.getSenderDetails().getAppId(), r.getSenderDetails().getReference()) )
+                    .map( messageMapper::mapToLetterRequest )
                     .doOnNext( notification -> LOG.debugContext( xRequestId, "Sending letter to chs-gov-uk-integration-api", null ) )
                     .flatMap( notifyIntegrationService::sendLetterMessageToIntegrationApi )
                     .doOnSuccess( event -> LOG.infoContext( xRequestId, "Successfully completed response to chs-gov-uk-integration-api", null ) )
