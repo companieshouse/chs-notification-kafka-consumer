@@ -23,7 +23,7 @@
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
         <maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
         <structured-logging.version>3.0.37</structured-logging.version>
-        <log4j-version>2.24.2</log4j-version>
+        <log4j-version>2.25.3</log4j-version>
         <rest-service-common-library-version>2.0.2</rest-service-common-library-version>
         <private-api-sdk-java.version>4.0.422</private-api-sdk-java.version>
         <api-sdk-manager-java-library.version>3.0.9</api-sdk-manager-java-library.version>
@@ -47,7 +47,7 @@
         <gson.version>2.13.1</gson.version>
         <spring-security-core.version>6.5.4</spring-security-core.version>
         <spring-web.version>6.2.8</spring-web.version>
-        <tomcat-embed.version>11.0.14</tomcat-embed.version>
+        <tomcat-embed.version>11.0.18</tomcat-embed.version>
         <sonar-maven-plugin.version>4.0.0.4121</sonar-maven-plugin.version>
         <sonar.token>${CODE_ANALYSIS_TOKEN}</sonar.token>
         <sonar.login></sonar.login>
@@ -73,6 +73,19 @@
                 <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <!-- Temporarily overridden dependencies -->
+            <!--
+                Override dependency to fix CVE-2025-68161
+                Review to see if newer version of spring-boot-starter-web
+                supplies an updated version of this,
+                allowing removal of this dependency.
+            -->
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-api</artifactId>
+                <version>${log4j-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -101,6 +114,17 @@
             <groupId>uk.gov.companieshouse</groupId>
             <artifactId>kafka-models</artifactId>
             <version>${kafka-models.version}</version>
+            <exclusions>
+                <!-- Excluding to fix CVE-2025-11143, CVE-2025-5115, CVE-2026-1605-->
+                <exclusion>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.eclipse.jetty.ee10</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency>
@@ -178,10 +202,7 @@
             <groupId>org.springframework</groupId>
             <artifactId>spring-webflux</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.eclipse.jetty</groupId>
-            <artifactId>jetty-reactive-httpclient</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
