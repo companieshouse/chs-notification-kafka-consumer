@@ -1,8 +1,16 @@
 package uk.gov.companieshouse.chs.notification.kafka.consumer.kafkaintegration;
 
-import helpers.OutputCapture;
+import static helpers.utils.OutputAssertions.assertJsonHasAndEquals;
+import static helpers.utils.OutputAssertions.getDataFromLogMessage;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import consumer.exception.NonRetryableErrorException;
+import helpers.OutputCapture;
 import java.io.IOException;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,27 +24,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.test.util.ReflectionTestUtils;
 import reactor.core.publisher.Mono;
-import uk.gov.companieshouse.api.chs.notification.model.GovUkEmailDetailsRequest;
-import uk.gov.companieshouse.api.chs.notification.model.GovUkLetterDetailsRequest;
+import uk.gov.companieshouse.api.chs.notification.integration.model.EmailRequest;
+import uk.gov.companieshouse.api.chs.notification.integration.model.LetterRequest;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.NotifyIntegrationService;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.translator.MessageMapper;
 import uk.gov.companieshouse.logging.EventType;
 import uk.gov.companieshouse.notification.ChsEmailNotification;
 import uk.gov.companieshouse.notification.ChsLetterNotification;
-import uk.gov.companieshouse.notification.SenderDetails;
-
-
-import static helpers.utils.OutputAssertions.assertJsonHasAndEquals;
-import static helpers.utils.OutputAssertions.getDataFromLogMessage;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @Tag("unit-test")
 class KafkaConsumerServiceTest {
+
+    private static final String LETTER_DEBUG_LOG_MESSAGE = "Consuming letter record: ";
 
     @Mock
     private MessageMapper messageMapper;
@@ -55,33 +55,23 @@ class KafkaConsumerServiceTest {
 
     private ChsEmailNotification mockEmailNotification;
     private ChsLetterNotification mockLetterNotification;
-    private GovUkEmailDetailsRequest mockEmailRequest;
-    private GovUkLetterDetailsRequest mockLetterRequest;
+    private EmailRequest mockEmailRequest;
+    private LetterRequest mockLetterRequest;
     private ConsumerRecord<String, ChsEmailNotification> emailRecord;
     private ConsumerRecord<String, ChsLetterNotification> letterRecord;
-    
-    private static final String EMAIL_INFO_LOG_MESSAGE = "Consuming email record with sender reference: email-ref-123";
-    private static final String EMAIL_ERROR_LOG_MESSAGE = "Failed to send email request to integration API";
-
-    private static final String LETTER_INFO_LOG_MESSAGE = "Consuming letter record with sender reference: letter-ref-456";
-    private static final String LETTER_DEBUG_LOG_MESSAGE = "Consuming letter record: ";
-    private static final String LETTER_ERROR_LOG_MESSAGE = "Failed to send letter request to integration API";
-
 
     @BeforeEach
     void setUp() {
         mockEmailNotification = new ChsEmailNotification();
+        mockEmailNotification.setAppId("chips");
+        mockEmailNotification.setReference("email-ref-123");
+
         mockLetterNotification = new ChsLetterNotification();
-        SenderDetails emailSenderDetails = new SenderDetails();
-        emailSenderDetails.setReference("email-ref-123");
-        mockEmailNotification.setSenderDetails(emailSenderDetails);
+        mockLetterNotification.setAppId("app-id");
+        mockLetterNotification.setReference("letter-ref-123");
 
-        SenderDetails letterSenderDetails = new SenderDetails();
-        letterSenderDetails.setReference("letter-ref-456");
-        mockLetterNotification.setSenderDetails(letterSenderDetails);
-
-        mockEmailRequest = new GovUkEmailDetailsRequest();
-        mockLetterRequest = new GovUkLetterDetailsRequest();
+        mockEmailRequest = new EmailRequest();
+        mockLetterRequest = new LetterRequest();
 
         emailRecord = new ConsumerRecord<>(EMAIL_TOPIC, 0, 0L, "key", mockEmailNotification);
         letterRecord = new ConsumerRecord<>(LETTER_TOPIC, 0, 0L, "key", mockLetterNotification);
@@ -92,7 +82,7 @@ class KafkaConsumerServiceTest {
     @Test
     void When_ConsumingValidEmailMessage_Expect_MessageSentAndAcknowledged() throws IOException {
         // Given
-        when(messageMapper.mapToEmailDetailsRequest(mockEmailNotification)).thenReturn(
+        when(messageMapper.mapToEmailRequest(mockEmailNotification)).thenReturn(
                 mockEmailRequest);
         when(notifyIntegrationService.sendEmailMessageToIntegrationApi(
                 mockEmailRequest)).thenReturn(Mono.empty());
@@ -108,14 +98,14 @@ class KafkaConsumerServiceTest {
         }
 
         // Then
-        verify(messageMapper).mapToEmailDetailsRequest(mockEmailNotification);
+        verify(messageMapper).mapToEmailRequest(mockEmailNotification);
         verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(mockEmailRequest);
     }
 
     @Test
     void When_ConsumingValidLetterMessage_Expect_MessageSentAndAcknowledged() throws IOException {
         // Given
-        when(messageMapper.mapToLetterDetailsRequest(mockLetterNotification)).thenReturn(
+        when(messageMapper.mapToLetterRequest(mockLetterNotification)).thenReturn(
                 mockLetterRequest);
         when(notifyIntegrationService.sendLetterMessageToIntegrationApi(
                 mockLetterRequest)).thenReturn(Mono.empty());
@@ -130,7 +120,7 @@ class KafkaConsumerServiceTest {
         }
 
         // Then
-        verify(messageMapper).mapToLetterDetailsRequest(mockLetterNotification);
+        verify(messageMapper).mapToLetterRequest(mockLetterNotification);
         verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest);
     }
 
@@ -139,7 +129,7 @@ class KafkaConsumerServiceTest {
             throws IOException {
         // Given
         RuntimeException mappingException = new RuntimeException("Mapping failed");
-        when(messageMapper.mapToEmailDetailsRequest(mockEmailNotification)).thenThrow(
+        when(messageMapper.mapToEmailRequest(mockEmailNotification)).thenThrow(
                 mappingException);
 
         try (var outputCapture = new OutputCapture()) {
@@ -150,7 +140,7 @@ class KafkaConsumerServiceTest {
         }
 
         // Then
-        verify(messageMapper).mapToEmailDetailsRequest(mockEmailNotification);
+        verify(messageMapper).mapToEmailRequest(mockEmailNotification);
         verifyNoInteractions(notifyIntegrationService);
     }
 
@@ -159,7 +149,7 @@ class KafkaConsumerServiceTest {
             throws IOException {
         // Given
         RuntimeException mappingException = new RuntimeException("Mapping failed");
-        when(messageMapper.mapToLetterDetailsRequest(mockLetterNotification)).thenThrow(
+        when(messageMapper.mapToLetterRequest(mockLetterNotification)).thenThrow(
                 mappingException);
 
         try (var outputCapture = new OutputCapture()) {
@@ -169,7 +159,7 @@ class KafkaConsumerServiceTest {
         }
 
         // Then
-        verify(messageMapper).mapToLetterDetailsRequest(mockLetterNotification);
+        verify(messageMapper).mapToLetterRequest(mockLetterNotification);
         verifyNoInteractions(notifyIntegrationService);
     }
 
@@ -178,7 +168,7 @@ class KafkaConsumerServiceTest {
             throws IOException {
         // Given
         RuntimeException apiException = new RuntimeException("API failed");
-        when(messageMapper.mapToEmailDetailsRequest(mockEmailNotification)).thenReturn(
+        when(messageMapper.mapToEmailRequest(mockEmailNotification)).thenReturn(
                 mockEmailRequest);
         when(notifyIntegrationService.sendEmailMessageToIntegrationApi(
                 mockEmailRequest)).thenReturn(Mono.error(apiException));
@@ -195,7 +185,7 @@ class KafkaConsumerServiceTest {
         }
 
         // Then
-        verify(messageMapper).mapToEmailDetailsRequest(mockEmailNotification);
+        verify(messageMapper).mapToEmailRequest(mockEmailNotification);
         verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(mockEmailRequest);
     }
 
@@ -203,7 +193,7 @@ class KafkaConsumerServiceTest {
     void When_LetterApiIntegrationFails_Expect_ExceptionThrownAndNoAcknowledgment() {
         // Given
         RuntimeException apiException = new RuntimeException("API failed");
-        when(messageMapper.mapToLetterDetailsRequest(mockLetterNotification)).thenReturn(
+        when(messageMapper.mapToLetterRequest(mockLetterNotification)).thenReturn(
                 mockLetterRequest);
         when(notifyIntegrationService.sendLetterMessageToIntegrationApi(
                 mockLetterRequest)).thenReturn(Mono.error(apiException));
@@ -213,7 +203,7 @@ class KafkaConsumerServiceTest {
                 () -> kafkaConsumerService.consumeLetterMessage(null, letterRecord, acknowledgment));
 
         // Then
-        verify(messageMapper).mapToLetterDetailsRequest(mockLetterNotification);
+        verify(messageMapper).mapToLetterRequest(mockLetterNotification);
         verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest);
     }
 
@@ -224,7 +214,7 @@ class KafkaConsumerServiceTest {
         KafkaConsumerService spyKafkaConsumerService = Mockito.spy(kafkaConsumerService);
 
         // First call fails, second call succeeds
-        when(messageMapper.mapToEmailDetailsRequest(mockEmailNotification)).thenReturn(
+        when(messageMapper.mapToEmailRequest(mockEmailNotification)).thenReturn(
                 mockEmailRequest);
         when(notifyIntegrationService.sendEmailMessageToIntegrationApi(
                 mockEmailRequest)).thenReturn(
@@ -242,7 +232,7 @@ class KafkaConsumerServiceTest {
         }
 
         // Verify first attempt behavior
-        verify(messageMapper).mapToEmailDetailsRequest(mockEmailNotification);
+        verify(messageMapper).mapToEmailRequest(mockEmailNotification);
         verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(mockEmailRequest);
 
         try (var outputCapture = new OutputCapture()) {
@@ -251,7 +241,7 @@ class KafkaConsumerServiceTest {
 
         }
         // Then - Verify the retry succeeded and was acknowledged
-        verify(messageMapper, times(2)).mapToEmailDetailsRequest(mockEmailNotification);
+        verify(messageMapper, times(2)).mapToEmailRequest(mockEmailNotification);
         verify(notifyIntegrationService, times(2)).sendEmailMessageToIntegrationApi(
                 mockEmailRequest);
     }
@@ -263,7 +253,7 @@ class KafkaConsumerServiceTest {
         KafkaConsumerService spyKafkaConsumerService = Mockito.spy(kafkaConsumerService);
 
         // First call fails, second call succeeds
-        when(messageMapper.mapToLetterDetailsRequest(mockLetterNotification)).thenReturn(
+        when(messageMapper.mapToLetterRequest(mockLetterNotification)).thenReturn(
                 mockLetterRequest);
         when(notifyIntegrationService.sendLetterMessageToIntegrationApi(
                 mockLetterRequest)).thenReturn(
@@ -278,7 +268,7 @@ class KafkaConsumerServiceTest {
         }
 
         // Verify first attempt behavior
-        verify(messageMapper).mapToLetterDetailsRequest(mockLetterNotification);
+        verify(messageMapper).mapToLetterRequest(mockLetterNotification);
         verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest);
         verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest);
 
@@ -292,7 +282,7 @@ class KafkaConsumerServiceTest {
         }
 
         // Then - Verify the retry succeeded and was acknowledged
-        verify(messageMapper, times(2)).mapToLetterDetailsRequest(mockLetterNotification);
+        verify(messageMapper, times(2)).mapToLetterRequest(mockLetterNotification);
         verify(notifyIntegrationService, times(2)).sendLetterMessageToIntegrationApi(
                 mockLetterRequest);
     }
@@ -302,7 +292,7 @@ class KafkaConsumerServiceTest {
         // Given
         NonRetryableErrorException nonRetryableError = new NonRetryableErrorException(
                 "Do not retry this error");
-        when(messageMapper.mapToEmailDetailsRequest(mockEmailNotification)).thenReturn(
+        when(messageMapper.mapToEmailRequest(mockEmailNotification)).thenReturn(
                 mockEmailRequest);
         when(notifyIntegrationService.sendEmailMessageToIntegrationApi(
                 mockEmailRequest)).thenReturn(Mono.error(nonRetryableError));
@@ -315,7 +305,7 @@ class KafkaConsumerServiceTest {
         }
 
         // Then
-        verify(messageMapper).mapToEmailDetailsRequest(mockEmailNotification);
+        verify(messageMapper).mapToEmailRequest(mockEmailNotification);
         verify(notifyIntegrationService).sendEmailMessageToIntegrationApi(mockEmailRequest);
     }
 
@@ -324,7 +314,7 @@ class KafkaConsumerServiceTest {
         // Given
         NonRetryableErrorException nonRetryableError = new NonRetryableErrorException(
                 "Do not retry this error");
-        when(messageMapper.mapToLetterDetailsRequest(mockLetterNotification)).thenReturn(
+        when(messageMapper.mapToLetterRequest(mockLetterNotification)).thenReturn(
                 mockLetterRequest);
         when(notifyIntegrationService.sendLetterMessageToIntegrationApi(
                 mockLetterRequest)).thenReturn(Mono.error(nonRetryableError));
@@ -337,7 +327,7 @@ class KafkaConsumerServiceTest {
         }
 
         // Then
-        verify(messageMapper).mapToLetterDetailsRequest(mockLetterNotification);
+        verify(messageMapper).mapToLetterRequest(mockLetterNotification);
         verify(notifyIntegrationService).sendLetterMessageToIntegrationApi(mockLetterRequest);
     }
 

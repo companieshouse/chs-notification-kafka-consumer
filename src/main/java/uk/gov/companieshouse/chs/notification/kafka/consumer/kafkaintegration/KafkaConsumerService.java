@@ -79,12 +79,12 @@ class KafkaConsumerService {
             LOG.debugContext(xRequestId, "Consuming email record: " + consumerRecord, logMapBuilder.build().getLogMap());
 
             final var emailNotification = consumerRecord.value();
-            final var reference = emailNotification.getSenderDetails().getReference();
+            final var reference = emailNotification.getReference();
 
             LOG.debugContext(xRequestId, "Consuming email record with sender reference: " + reference, null);
             Mono.just( emailNotification )
                     .doOnNext( notification -> LOG.debugContext( xRequestId, "Mapping email data", null ) )
-                    .map( messageMapper::mapToEmailDetailsRequest )
+                    .map( messageMapper::mapToEmailRequest )
                     .doOnNext( notification -> LOG.debugContext( xRequestId, "Sending email to chs-gov-uk-integration-api", null ) )
                     .flatMap( notifyIntegrationService::sendEmailMessageToIntegrationApi )
                     .doOnSuccess( event -> LOG.infoContext( xRequestId, "Successfully completed response to chs-gov-uk-integration-api", null ) )
@@ -132,12 +132,12 @@ class KafkaConsumerService {
             LOG.debugContext(xRequestId, "Consuming letter record: " + consumerRecord, logMapBuilder.build().getLogMap());
 
             final var letterNotification = consumerRecord.value();
-            final var reference = letterNotification.getSenderDetails().getReference();
+            final var reference = letterNotification.getReference();
 
             LOG.debugContext(xRequestId, "Consuming letter record with sender reference: " + reference, null);
             Mono.just( letterNotification )
                     .doOnNext( notification -> LOG.debugContext( xRequestId, "Mapping letter data", null ) )
-                    .map( messageMapper::mapToLetterDetailsRequest )
+                    .map( messageMapper::mapToLetterRequest )
                     .doOnNext( notification -> LOG.debugContext( xRequestId, "Sending letter to chs-gov-uk-integration-api", null ) )
                     .flatMap( notifyIntegrationService::sendLetterMessageToIntegrationApi )
                     .doOnSuccess( event -> LOG.infoContext( xRequestId, "Successfully completed response to chs-gov-uk-integration-api", null ) )
