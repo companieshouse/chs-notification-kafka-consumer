@@ -14,5 +14,6 @@ public class ChsNotificationKafkaConsumerApplication {
 
     static {
         System.setProperty("org.apache.avro.SERIALIZABLE_PACKAGES", "*");
+//        System.setProperty("org.apache.avro.SERIALIZABLE_PACKAGES", "uk.gov.companieshouse.*, consumer.*, accounts.*, email.*, monitor.*, payments.*, java.*, org.apache.avro.*, org.apache.kafka.*");
     }
 }
