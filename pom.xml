@@ -24,9 +24,9 @@
 
         <!-- Internal Dependencies -->
         <!-- Source: https://github.com/companieshouse/ch-boms/releases -->
-        <ch-dependency-bom.version>0.1.36</ch-dependency-bom.version>
+        <ch-dependency-bom.version>0.1.37</ch-dependency-bom.version>
         <!-- Source: https://github.com/companieshouse/private-api-sdk-java/releases -->
-        <private-api-sdk-java.version>7.2.46</private-api-sdk-java.version>
+        <private-api-sdk-java.version>7.2.47</private-api-sdk-java.version>
 
         <!-- External Dependencies -->
         <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies -->
