@@ -31,8 +31,6 @@
         <!-- External Dependencies -->
         <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies -->
         <spring-boot.version>4.1.2</spring-boot.version>
-        <!-- Source: https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core -->
-        <log4j.version>2.26.1</log4j.version>
         <!-- Source: https://mvnrepository.com/artifact/org.mapstruct/mapstruct -->
         <org.mapstruct.version>1.6.3</org.mapstruct.version>
         <!-- Source: https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
@@ -70,11 +68,6 @@
         <maven-surefire-plugin.version>3.6.1</maven-surefire-plugin.version>
         <!-- Source: https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
         <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
-        <!-- Source: https://mvnrepository.com/artifact/org.sonarsource.scanner.maven/sonar-maven-plugin -->
-        <sonar-maven-plugin.version>5.8.0.7211</sonar-maven-plugin.version>
-        <sonar.projectName>chs-notification-kafka-consumer</sonar.projectName>
-        <sonar.projectKey>uk.gov.companieshouse:chs-notification-kafka-consumer</sonar.projectKey>
-        <sonar.java.binaries>${project.basedir}/target,${project.basedir}/target/*</sonar.java.binaries>
 
     </properties>
 
@@ -96,19 +89,6 @@
                 <version>${ch-dependency-bom.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-
-            <!-- Temporarily overridden dependencies -->
-            <!--
-                Override dependency to fix CVE-2025-68161
-                Review to see if newer version of spring-boot-starter-web
-                supplies an updated version of this,
-                allowing removal of this dependency.
-            -->
-            <dependency>
-                <groupId>org.apache.logging.log4j</groupId>
-                <artifactId>log4j-api</artifactId>
-                <version>${log4j.version}</version>
             </dependency>
 
             <dependency>
@@ -471,35 +451,30 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>jib-maven-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>3.5.2</version>
                 <configuration>
                     <from>
                         <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/ci-corretto-build-21</image>
                     </from>
                     <to>
-                        <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/acsp-manage-users-api</image>
+                        <image>416670754337.dkr.ecr.eu-west-2.amazonaws.com/chs-notification-kafka-consumer</image>
                     </to>
                     <container>
                         <expandClasspathDependencies>true</expandClasspathDependencies>
                     </container>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>${maven-surefire-plugin.version}</version>
             </plugin>
-            <plugin>
-                <groupId>org.jacoco</groupId>
-                <artifactId>jacoco-maven-plugin</artifactId>
-            </plugin>
-            <plugin>
-                <groupId>org.sonarsource.scanner.maven</groupId>
-                <artifactId>sonar-maven-plugin</artifactId>
-            </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
