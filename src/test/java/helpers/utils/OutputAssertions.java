@@ -1,9 +1,9 @@
 package helpers.utils;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
 import helpers.OutputCapture;
 import org.junit.jupiter.api.Assertions;
+import tools.jackson.databind.JsonNode;
 import uk.gov.companieshouse.logging.EventType;
 
 public class OutputAssertions {
@@ -17,7 +17,7 @@ public class OutputAssertions {
      * @throws AssertionError if the entry or its “data” field is missing
      */
     public static JsonNode getDataFromLogMessage(OutputCapture capture, EventType event,
-            String message) {
+                                                 String message) {
         var eventName = event.getName();
         var entries = capture.getJsonEntries();
         if (entries.isEmpty()) {
@@ -62,7 +62,7 @@ public class OutputAssertions {
         Assertions.assertNotNull(jsonNode,
                 "JSON node for field '" + fieldName + "' should not be null");
         Assertions.assertTrue(jsonNode.has(fieldName), "JSON should contain field: " + fieldName);
-        Assertions.assertEquals(expectedValue, jsonNode.get(fieldName).asText(),
+        Assertions.assertEquals(expectedValue, jsonNode.get(fieldName).asString(),
                 "Field '" + fieldName + "' should match expected");
     }
 }

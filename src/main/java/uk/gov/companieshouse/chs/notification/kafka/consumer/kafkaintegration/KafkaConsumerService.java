@@ -4,6 +4,7 @@ import consumer.exception.NonRetryableErrorException;
 import java.time.Duration;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
 import org.springframework.kafka.retrytopic.DltStrategy;
@@ -11,7 +12,6 @@ import org.springframework.kafka.retrytopic.RetryTopicHeaders;
 import org.springframework.kafka.retrytopic.SameIntervalTopicReuseStrategy;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.messaging.handler.annotation.Header;
-import org.springframework.retry.annotation.Backoff;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.NotifyIntegrationService;
@@ -50,7 +50,7 @@ class KafkaConsumerService {
      */
     @RetryableTopic(
             attempts = "${kafka.max-attempts}",
-            backoff = @Backoff(delayExpression = "${kafka.backoff-delay}"),
+            backOff = @BackOff(delayString = "${kafka.backoff-delay}"),
             sameIntervalTopicReuseStrategy = SameIntervalTopicReuseStrategy.SINGLE_TOPIC,
             dltTopicSuffix = "-error",
             dltStrategy = DltStrategy.FAIL_ON_ERROR,
@@ -103,7 +103,7 @@ class KafkaConsumerService {
      */
     @RetryableTopic(
             attempts = "${kafka.max-attempts}",
-            backoff = @Backoff(delayExpression = "${kafka.backoff-delay}"),
+            backOff = @BackOff(delayString = "${kafka.backoff-delay}"),
             sameIntervalTopicReuseStrategy = SameIntervalTopicReuseStrategy.SINGLE_TOPIC,
             dltTopicSuffix = "-error",
             dltStrategy = DltStrategy.FAIL_ON_ERROR,
