@@ -24,9 +24,9 @@
 
         <!-- Internal Dependencies -->
         <!-- Source: https://github.com/companieshouse/ch-boms/releases -->
-        <ch-dependency-bom.version>0.1.38</ch-dependency-bom.version>
+        <ch-dependency-bom.version>0.1.41</ch-dependency-bom.version>
         <!-- Source: https://github.com/companieshouse/private-api-sdk-java/releases -->
-        <private-api-sdk-java.version>7.2.47</private-api-sdk-java.version>
+        <private-api-sdk-java.version>7.2.50</private-api-sdk-java.version>
 
         <!-- External Dependencies -->
         <!-- Source: https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-dependencies -->
@@ -50,13 +50,13 @@
         <!-- Source: https://mvnrepository.com/artifact/commons-fileupload/commons-fileupload -->
         <commons-fileupload.version>1.6.0</commons-fileupload.version>
         <!-- Source: https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
-        <commons-lang3.version>3.21.0</commons-lang3.version>
+        <commons-lang3.version>3.22.0</commons-lang3.version>
         <!-- Source: https://mvnrepository.com/artifact/io.grpc/grpc-api -->
         <grpc.version>1.85.1</grpc.version>
         <!-- Source: https://mvnrepository.com/artifact/com.google.code.gson/gson -->
         <gson.version>2.15.0</gson.version>
         <!-- Source: https://mvnrepository.com/artifact/org.apache.tomcat.embed/tomcat-embed-core -->
-        <tomcat-embed.version>11.0.27</tomcat-embed.version>
+        <tomcat-embed.version>11.0.29</tomcat-embed.version>
         <!-- Source: https://mvnrepository.com/artifact/io.opentelemetry.instrumentation/opentelemetry-instrumentation-bom -->
         <opentelemetry.version>2.33.1</opentelemetry.version>
 
@@ -67,7 +67,7 @@
         <!-- Source: https://mvnrepository.com/artifact/org.apache.maven.plugins/maven-surefire-plugin -->
         <maven-surefire-plugin.version>3.6.1</maven-surefire-plugin.version>
         <!-- Source: https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin -->
-        <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.16</jacoco-maven-plugin.version>
 
     </properties>
 
@@ -126,7 +126,6 @@
                 <groupId>at.yawk.lz4</groupId>
                 <artifactId>lz4-java</artifactId>
                 <version>1.12.1</version>
-                <scope>compile</scope>
             </dependency>
 
             <!-- CVE-2026-90559-->
@@ -135,7 +134,6 @@
                 <groupId>org.xerial.snappy</groupId>
                 <artifactId>snappy-java</artifactId>
                 <version>1.1.10.12</version>
-                <scope>compile</scope>
             </dependency>
 
             <!-- CVE-2026-87795, CVE-2026-87823, CVE-2026-89046, CVE-2026-90560,
@@ -145,15 +143,13 @@
                 <groupId>com.github.luben</groupId>
                 <artifactId>zstd-jni</artifactId>
                 <version>1.5.7-24</version>
-                <scope>compile</scope>
             </dependency>
 
             <!-- Source: https://mvnrepository.com/artifact/com.google.guava/guava -->
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
-                <version>33.7.2-jre</version>
-                <scope>compile</scope>
+                <version>33.8.0-jre</version>
             </dependency>
 
             <!-- Source: https://mvnrepository.com/artifact/software.amazon.awssdk/bom -->
@@ -480,9 +476,32 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <configuration>
-                    <source>21</source>
-                    <target>21</target>
+                    <source>${java.version}</source>
+                    <target>${java.version}</target>
+                    <compilerArgs>
+                        <arg>-XDcompilePolicy=simple</arg>
+                        <arg>--should-stop=ifError=FLOW</arg>
+                        <arg>-Xplugin:ErrorProne</arg>
+                        <!-- necessary only if building with JDK21: https://github.com/google/error-prone/issues/5426 -->
+                        <arg>-XDaddTypeAnnotationsToSymbol=true</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
+                    </compilerArgs>
                     <annotationProcessorPaths>
+                        <path>
+                            <!-- Source: https://mvnrepository.com/artifact/com.google.errorprone/error_prone_core -->
+                            <groupId>com.google.errorprone</groupId>
+                            <artifactId>error_prone_core</artifactId>
+                            <version>2.52.0</version>
+                        </path>
                         <path>
                             <groupId>org.mapstruct</groupId>
                             <artifactId>mapstruct-processor</artifactId>
@@ -495,12 +514,6 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <version>3.10.0</version>
             </plugin>
 
         </plugins>

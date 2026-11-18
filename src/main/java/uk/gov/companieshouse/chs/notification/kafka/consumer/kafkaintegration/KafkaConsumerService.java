@@ -3,7 +3,6 @@ package uk.gov.companieshouse.chs.notification.kafka.consumer.kafkaintegration;
 import consumer.exception.NonRetryableErrorException;
 import java.time.Duration;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.BackOff;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.annotation.RetryableTopic;
@@ -28,12 +27,10 @@ import static uk.gov.companieshouse.chs.notification.kafka.consumer.ChsNotificat
 @Service
 class KafkaConsumerService {
 
-    @Value( "${kafka.max-attempts}" )
-    private Integer kafkaMaxAttempts;
-
     private static final Logger LOG = LoggerFactory.getLogger(APPLICATION_NAMESPACE);
 
     private final NotifyIntegrationService notifyIntegrationService;
+
     private final MessageMapper messageMapper;
 
     public KafkaConsumerService(

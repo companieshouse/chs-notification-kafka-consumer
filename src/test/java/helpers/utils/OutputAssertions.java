@@ -24,7 +24,7 @@ public class OutputAssertions {
             throw new AssertionError("No log entries found for event: " + eventName);
         }
         var matchingEventEntries = entries.stream()
-                .filter(e -> e.has("event") && eventName.equals(e.get("event").asText()))
+                .filter(e -> e.has("event") && eventName.equals(e.get("event").asString()))
                 .filter(e -> e.has("data") && e.get("data").has("message"))
                 .map(e -> e.get("data"))
                 .toList();
@@ -35,11 +35,11 @@ public class OutputAssertions {
         }
 
         return matchingEventEntries.stream()
-                .filter(e -> message.equals(e.get("message").asText()))
+                .filter(e -> message.equals(e.get("message").asString()))
                 .findFirst()
                 .orElseThrow(() -> {
                     String actualMessages = matchingEventEntries.stream()
-                            .map(e -> e.get("message").asText())
+                            .map(e -> e.get("message").asString())
                             .distinct()
                             .reduce((a, b) -> a + "\n" + b)
                             .orElse("[no messages found]");

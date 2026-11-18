@@ -76,7 +76,6 @@ class KafkaConsumerServiceTest {
         emailRecord = new ConsumerRecord<>(EMAIL_TOPIC, 0, 0L, "key", mockEmailNotification);
         letterRecord = new ConsumerRecord<>(LETTER_TOPIC, 0, 0L, "key", mockLetterNotification);
 
-        ReflectionTestUtils.setField(kafkaConsumerService, "kafkaMaxAttempts", 5);
     }
 
     @Test
