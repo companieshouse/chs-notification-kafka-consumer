@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import consumer.exception.NonRetryableErrorException;
 import helpers.OutputCapture;
 import java.io.IOException;
@@ -24,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.test.util.ReflectionTestUtils;
 import reactor.core.publisher.Mono;
+import tools.jackson.databind.JsonNode;
 import uk.gov.companieshouse.api.chs.notification.integration.model.EmailRequest;
 import uk.gov.companieshouse.api.chs.notification.integration.model.LetterRequest;
 import uk.gov.companieshouse.chs.notification.kafka.consumer.apiintegration.NotifyIntegrationService;
@@ -76,7 +76,6 @@ class KafkaConsumerServiceTest {
         emailRecord = new ConsumerRecord<>(EMAIL_TOPIC, 0, 0L, "key", mockEmailNotification);
         letterRecord = new ConsumerRecord<>(LETTER_TOPIC, 0, 0L, "key", mockLetterNotification);
 
-        ReflectionTestUtils.setField(kafkaConsumerService, "kafkaMaxAttempts", 5);
     }
 
     @Test

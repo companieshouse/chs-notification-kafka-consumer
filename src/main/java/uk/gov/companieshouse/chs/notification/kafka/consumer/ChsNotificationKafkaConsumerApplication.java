@@ -12,4 +12,7 @@ public class ChsNotificationKafkaConsumerApplication {
         SpringApplication.run(ChsNotificationKafkaConsumerApplication.class, args);
     }
 
+    static {
+        System.setProperty("org.apache.avro.SERIALIZABLE_PACKAGES", "*");
+    }
 }

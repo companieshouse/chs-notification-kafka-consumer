@@ -1,8 +1,5 @@
 package uk.gov.companieshouse.chs.notification.kafka.consumer.kafkaintegration.config;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import consumer.deserialization.AvroDeserializer;
 import consumer.serialization.AvroSerializer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -23,6 +20,9 @@ import org.springframework.kafka.support.serializer.ErrorHandlingDeserializer;
 import uk.gov.companieshouse.notification.ChsEmailNotification;
 import uk.gov.companieshouse.notification.ChsLetterNotification;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Configuration
 @EnableKafka
 public class KafkaConfig {
@@ -35,10 +35,10 @@ public class KafkaConfig {
     public KafkaConfig(AvroDeserializer<ChsEmailNotification> emailDeserializer,
                        AvroDeserializer<ChsLetterNotification> letterDeserializer,
                        @Value("${spring.kafka.bootstrap-servers}") String bootstrapServers,
-                       @Value("${kafka.session.timeout}" ) int sessionTimeout,
+                       @Value("${kafka.session.timeout}") int sessionTimeout,
                        @Value("${kafka.max.poll.interval}") int maxPollInterval,
                        @Value("${kafka.heartbeat.interval}") int heartbeatInterval,
-                       @Value("${kafka.max.poll.records}") int maxPollRecords){
+                       @Value("${kafka.max.poll.records}") int maxPollRecords) {
         this.emailDeserializer = emailDeserializer;
         this.letterDeserializer = letterDeserializer;
 
@@ -54,9 +54,9 @@ public class KafkaConfig {
         consumerProps.put(ConsumerConfig.AUTO_OFFSET_RESET_CONFIG, "earliest");
         consumerProps.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
         consumerProps.put(ConsumerConfig.ISOLATION_LEVEL_CONFIG, "read_committed");
-        consumerProps.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, sessionTimeout );
-        consumerProps.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, maxPollInterval );
-        consumerProps.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, heartbeatInterval );
+        consumerProps.put(ConsumerConfig.SESSION_TIMEOUT_MS_CONFIG, sessionTimeout);
+        consumerProps.put(ConsumerConfig.MAX_POLL_INTERVAL_MS_CONFIG, maxPollInterval);
+        consumerProps.put(ConsumerConfig.HEARTBEAT_INTERVAL_MS_CONFIG, heartbeatInterval);
         consumerProps.put(ConsumerConfig.MAX_POLL_RECORDS_CONFIG, maxPollRecords);
 
         /* SESSION_TIMEOUT_MS_CONFIG, MAX_POLL_INTERVAL_MS_CONFIG, HEARTBEAT_INTERVAL_MS_CONFIG, MAX_POLL_RECORDS_CONFIG

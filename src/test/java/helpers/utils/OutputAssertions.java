@@ -1,9 +1,9 @@
 package helpers.utils;
 
 
-import com.fasterxml.jackson.databind.JsonNode;
 import helpers.OutputCapture;
 import org.junit.jupiter.api.Assertions;
+import tools.jackson.databind.JsonNode;
 import uk.gov.companieshouse.logging.EventType;
 
 public class OutputAssertions {
@@ -17,14 +17,14 @@ public class OutputAssertions {
      * @throws AssertionError if the entry or its “data” field is missing
      */
     public static JsonNode getDataFromLogMessage(OutputCapture capture, EventType event,
-            String message) {
+                                                 String message) {
         var eventName = event.getName();
         var entries = capture.getJsonEntries();
         if (entries.isEmpty()) {
             throw new AssertionError("No log entries found for event: " + eventName);
         }
         var matchingEventEntries = entries.stream()
-                .filter(e -> e.has("event") && eventName.equals(e.get("event").asText()))
+                .filter(e -> e.has("event") && eventName.equals(e.get("event").asString()))
                 .filter(e -> e.has("data") && e.get("data").has("message"))
                 .map(e -> e.get("data"))
                 .toList();
@@ -35,11 +35,11 @@ public class OutputAssertions {
         }
 
         return matchingEventEntries.stream()
-                .filter(e -> message.equals(e.get("message").asText()))
+                .filter(e -> message.equals(e.get("message").asString()))
                 .findFirst()
                 .orElseThrow(() -> {
                     String actualMessages = matchingEventEntries.stream()
-                            .map(e -> e.get("message").asText())
+                            .map(e -> e.get("message").asString())
                             .distinct()
                             .reduce((a, b) -> a + "\n" + b)
                             .orElse("[no messages found]");
@@ -62,7 +62,7 @@ public class OutputAssertions {
         Assertions.assertNotNull(jsonNode,
                 "JSON node for field '" + fieldName + "' should not be null");
         Assertions.assertTrue(jsonNode.has(fieldName), "JSON should contain field: " + fieldName);
-        Assertions.assertEquals(expectedValue, jsonNode.get(fieldName).asText(),
+        Assertions.assertEquals(expectedValue, jsonNode.get(fieldName).asString(),
                 "Field '" + fieldName + "' should match expected");
     }
 }
