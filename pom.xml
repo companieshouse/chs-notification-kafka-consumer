@@ -40,7 +40,7 @@
         <!-- Source: https://mvnrepository.com/artifact/de.flapdoodle.embed/de.flapdoodle.embed.mongo -->
         <flapdoodle.version>5.0.0</flapdoodle.version>
         <!-- Source: https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
-        <logback-classic.version>1.6.7</logback-classic.version>
+        <logback-classic.version>1.6.8</logback-classic.version>
         <!-- Source: https://mvnrepository.com/artifact/org.mockito/mockito-junit-jupiter -->
         <mockito-junit-jupiter.version>5.24.0</mockito-junit-jupiter.version>
         <!-- Source: https://mvnrepository.com/artifact/org.hamcrest/hamcrest-all -->
